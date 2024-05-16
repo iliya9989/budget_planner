@@ -1,5 +1,34 @@
 <?php
+require "../db.php";
 session_start();
+
+if (!empty($_POST['email']) && !empty($_POST['password'])) {
+    $email = trim($_POST['email']);
+
+    $checkEmailQuery = $db->prepare('SELECT email FROM users WHERE email = :email');
+    $checkEmailQuery->bindParam(':email', $email, PDO::PARAM_STR);
+    $checkEmailQuery->execute();
+
+    if ($checkEmailQuery->rowCount() > 0) {
+        $getHashedPasswordQuery = $db->prepare('SELECT password FROM users WHERE email=:email');
+        $getHashedPasswordQuery->bindParam(':email', $email, PDO::PARAM_STR);
+        $getHashedPasswordQuery->execute();
+        $hashedPassword = $getHashedPasswordQuery->fetch(PDO::FETCH_ASSOC)['password'];
+
+        if (password_verify($_POST['password'],$hashedPassword)) {
+            $getUserIdQuery = $db->prepare('SELECT user_id FROM users WHERE email = :email');
+            $getUserIdQuery->bindParam(':email', $email, PDO::PARAM_STR);
+            $getUserIdQuery->execute();
+            $_SESSION['user_id'] = $getUserIdQuery->fetch(PDO::FETCH_ASSOC)['user_id'];
+            setcookie('user_id',$_SESSION['user_id'], time() + 86000);
+
+            header('Location: ..');
+        } else {
+            echo "Wrong password";
+        }
+    }
+}
+
 ?>
 
 <!DOCTYPE html>

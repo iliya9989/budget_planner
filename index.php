@@ -1,5 +1,11 @@
 <?php
 session_start();
+require 'db.php';
+
+/* TODO: logged user redirection */
+
+
+
 ?>
 
 <!DOCTYPE html>
