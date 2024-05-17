@@ -156,7 +156,7 @@ const changeBalanceField = () => {
   }
 };
 
-// Function for sending budget data to index.php, which then sends them to the DB
+// Function for sending budget data to index.html, which then sends them to the DB
 function submitForms() {
   if (!incomeItemsContainer.hasChildNodes() || !expensesItemsContainer.hasChildNodes()) {
     alert("Please add at least one income item and one expense item before saving.");
@@ -177,9 +177,11 @@ function submitForms() {
     const value = child.getElementsByTagName("p")[1].textContent;
     arrExpensesItems[name] = parseInt(value);
   });
+  const budgetName = document.getElementById("budgetName").value;
   const data = {
     incomeItems: arrIncomeItems,
     expensesItems: arrExpensesItems,
+    budgetName: budgetName,
   };
 
   console.log('Sending data:', data); // Log data to the browser console
