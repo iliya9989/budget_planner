@@ -177,11 +177,14 @@ function submitForms() {
     const value = child.getElementsByTagName("p")[1].textContent;
     arrExpensesItems[name] = parseInt(value);
   });
+  const budgetID = document.getElementById("budget_id").innerText;
   const budgetName = document.getElementById("budgetName").value;
   const data = {
     incomeItems: arrIncomeItems,
     expensesItems: arrExpensesItems,
     budgetName: budgetName,
+    budgetBalance: parseInt(balance),
+    budget_id: parseInt(budgetID),
   };
 
   console.log('Sending data:', data); // Log data to the browser console

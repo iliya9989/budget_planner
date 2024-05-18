@@ -20,7 +20,14 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
             $getUserIdQuery->bindParam(':email', $email, PDO::PARAM_STR);
             $getUserIdQuery->execute();
             $_SESSION['user_id'] = $getUserIdQuery->fetch(PDO::FETCH_ASSOC)['user_id'];
-            setcookie('user_id',$_SESSION['user_id'], time() + 86000);
+            setcookie('user_id',$_SESSION['user_id'], time() + 86000,'/');
+
+            $getUsername = $db->prepare('SELECT username FROM users WHERE email = :email');
+            $getUsername->bindParam(':email', $email, PDO::PARAM_STR);
+            $getUsername->execute();
+            $username = $getUsername->fetch(PDO::FETCH_ASSOC)['username'];
+            $_SESSION['username'] = $username;
+            setcookie('username', $username, time() + 86000,'/');
 
             header('Location: ..');
         } else {
@@ -47,7 +54,7 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
     </div>
     <div class="row">
         <div class="col-12 col-md-8 col-lg-6 mx-auto">
-            <form>
+            <form method="post">
                 <div class="form-group">
                     <label for="email" class="text-light">Email address</label>
                     <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Enter email">

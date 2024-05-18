@@ -28,6 +28,8 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
             $getUserIdQuery->execute();
             $_SESSION['user_id'] = $getUserIdQuery->fetch(PDO::FETCH_ASSOC)['user_id'];
             setcookie('user_id',$_SESSION['user_id'], time() + 86000, '/');
+            $_SESSION['username'] = $username;
+            setcookie('username', $username, time() + 86000, '/');
 
             header('Location: ..');
         }

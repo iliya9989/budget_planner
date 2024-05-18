@@ -2,9 +2,13 @@
 session_start();
 require 'db.php';
 
-/* TODO: logged user redirection */
-
-
+if (!empty($_SESSION['user_id'])) {
+    header('Location: budgets');
+} else if (!empty($_COOKIE['user_id'])) {
+    $_SESSION['user_id'] = $_COOKIE['user_id'];
+    $_SESSION['username'] = $_COOKIE['username'];
+    header('Location: budgets');
+}
 
 ?>
 
@@ -12,7 +16,7 @@ require 'db.php';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome</title>
+    <title>Budget Planner</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 <body class="bg-dark d-flex align-items-center justify-content-center" style="height: 100vh;">

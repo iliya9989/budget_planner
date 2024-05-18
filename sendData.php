@@ -38,13 +38,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data['expensesItems'] = [];
     }
 
+    $budgetBalance = isset($data['budgetBalance']) ? $data['budgetBalance'] : 0;
+
     try {
         // Start transaction
         $db->beginTransaction();
 
         // Create a new budget entry
-        $stmt = $db->prepare("INSERT INTO budgets (user_id, budget_name) VALUES (?, ?)");
-        $stmt->execute([$user_id, $budgetName]);
+        $stmt = $db->prepare("INSERT INTO budgets (user_id, budget_name, budget_balance) VALUES (?, ?, ?)");
+        $stmt->execute([$user_id, $budgetName, $budgetBalance]);
         $budget_id = $db->lastInsertId();
 
         // Prepare statements for incomes and expenses
@@ -80,4 +82,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     exit;
 }
-?>
