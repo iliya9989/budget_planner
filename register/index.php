@@ -1,5 +1,5 @@
 <?php
-require "../db.php";
+require "../database/db.php";
 session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -46,6 +46,7 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
 <head>
     <meta charset="UTF-8">
     <title>Welcome</title>
+    <link rel="icon" href="../favicon.png" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 <body class="bg-dark d-flex align-items-center justify-content-center" style="height: 100vh;">

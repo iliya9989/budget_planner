@@ -1,8 +1,8 @@
 <?php
 session_start();
-require '../db.php';
+require '../database/db.php';
 
-$budgetData = [];
+$budgetData = null;
 if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
     $getBudgetDataQuery = $db->prepare('SELECT budget_id, budget_name, budget_balance 
@@ -12,7 +12,7 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
     $getBudgetDataQuery->execute();
     $budgetData = $getBudgetDataQuery->fetchAll(PDO::FETCH_ASSOC);
 } else {
-    header('Location: ../index.php');
+    header('Location: ../edit_budget.php');
 }
 
 ?>
@@ -22,6 +22,7 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <title>My Budgets</title>
+    <link rel="icon" href="../favicon.png" />
     <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
             rel="stylesheet"
@@ -57,7 +58,7 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
                                 <div class="row bg-success border rounded-3 p-3 my-1 shadow text-light justify-content-around">
                                     <p class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break"><?= $budget['budget_name'] ?></p>
                                     <p class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1"><?= $budget['budget_balance'] ?></p>
-                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget?budget_id=<?= htmlspecialchars($budget['budget_id']) ?>">Edit</a>
+                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget/edit_budget.php?budget_id=<?= htmlspecialchars($budget['budget_id']) ?>">Edit</a>
                                 </div>
                             </div>
                             <?php
@@ -67,7 +68,7 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
                                 <div class="row bg-danger border rounded-3 p-3 my-1 shadow text-light justify-content-around">
                                     <p class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break"><?= $budget['budget_name'] ?></p>
                                     <p class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break ms-1"><?= $budget['budget_balance'] ?></p>
-                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget?budget_id=<?= htmlspecialchars($budget['budget_id']) ?>">Edit</a>
+                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget/edit_budget.php?budget_id=<?= htmlspecialchars($budget['budget_id']) ?>">Edit</a>
                                 </div>
                             </div>
                             <?php
@@ -77,8 +78,7 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
                                 <div class="row bg-warning border rounded-3 p-3 my-1 shadow text-light justify-content-around">
                                     <p class="col-auto my-auto bg-light border rounded-5 text-warning-emphasis text-center text-break"><?= $budget['budget_name'] ?></p>
                                     <p class="col-auto my-auto bg-light border rounded-5 text-warning-emphasis text-center text-break ms-1"><?= $budget['budget_balance'] ?></p>
-                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget?budget_id=<?= htmlspecialchars($budget['budget_id']) ?>">Edit</a>
-
+                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget/edit_budget.php?budget_id=<?= htmlspecialchars($budget['budget_id']) ?>">Edit</a>
                                 </div>
                             </div>
                             <?php
