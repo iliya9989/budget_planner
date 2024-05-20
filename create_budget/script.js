@@ -19,6 +19,23 @@ let totalIncome = 0;
 let totalExpenses = 0;
 let balance = 0;
 
+// Fetch categories function
+async function fetchCategories(selectElement) {
+  try {
+    const response = await fetch("../database/get_categories.php");
+    const categories = await response.json();
+    categories.forEach((category) => {
+      const option = document.createElement("option");
+      option.value = category.category_id;
+      option.textContent = category.category_name;
+      option.setAttribute("data-category-id", category.category_id);
+      selectElement.appendChild(option);
+    });
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+  }
+}
+
 // Submit event listener for income
 incomeSubmitButton.addEventListener("click", (event) => {
   event.preventDefault();
@@ -61,6 +78,18 @@ incomeSubmitButton.addEventListener("click", (event) => {
   };
   itemDeleteButton.addEventListener("click", removeItem);
 
+  // Select menu with categories for items
+  const selectCategoryMenu = document.createElement("select");
+  selectCategoryMenu.classList.add("form-select", "w-25");
+  const defaultSelectOption = document.createElement("option");
+  defaultSelectOption.innerText = "Category";
+  defaultSelectOption.setAttribute("value", "");
+  defaultSelectOption.setAttribute("disabled", "");
+  defaultSelectOption.setAttribute("selected", "");
+  selectCategoryMenu.appendChild(defaultSelectOption);
+
+  fetchCategories(selectCategoryMenu);
+
   totalIncome += parseInt(itemValue.innerText);
   balance += parseInt(itemValue.innerText);
   totalIncomeField.innerText = `Total income: ${totalIncome}`;
@@ -70,6 +99,7 @@ incomeSubmitButton.addEventListener("click", (event) => {
   incomeItemValue.value = "";
   item.appendChild(itemName);
   item.appendChild(itemValue);
+  item.appendChild(selectCategoryMenu);
   item.appendChild(itemDeleteButton);
   incomeItemsContainer.appendChild(item);
   changeBalanceField();
@@ -117,6 +147,18 @@ expensesSubmitButton.addEventListener("click", (event) => {
   };
   itemDeleteButton.addEventListener("click", removeItem);
 
+  // Select menu with categories for items
+  const selectCategoryMenu = document.createElement("select");
+  selectCategoryMenu.classList.add("form-select", "col-auto", "w-25");
+  const defaultSelectOption = document.createElement("option");
+  defaultSelectOption.innerText = "Category";
+  defaultSelectOption.setAttribute("value", "");
+  defaultSelectOption.setAttribute("disabled", "");
+  defaultSelectOption.setAttribute("selected", "");
+  selectCategoryMenu.appendChild(defaultSelectOption);
+
+  fetchCategories(selectCategoryMenu);
+
   totalExpenses += parseInt(itemValue.innerText);
   balance -= parseInt(itemValue.innerText);
   totalExpensesField.innerText = `Total expenses: ${totalExpenses}`;
@@ -126,6 +168,7 @@ expensesSubmitButton.addEventListener("click", (event) => {
   expensesItemValue.value = "";
   item.appendChild(itemName);
   item.appendChild(itemValue);
+  item.appendChild(selectCategoryMenu);
   item.appendChild(itemDeleteButton);
   expensesItemsContainer.appendChild(item);
   changeBalanceField();
@@ -134,24 +177,16 @@ expensesSubmitButton.addEventListener("click", (event) => {
 const changeBalanceField = () => {
   balanceField.innerText = `Balance: ${balance}`;
   if (balance === 0 && incomeItemsContainer.hasChildNodes() && expensesItemsContainer.hasChildNodes()) {
-    balanceField.classList.remove("bg-secondary");
-    balanceField.classList.remove("bg-success");
-    balanceField.classList.remove("bg-danger");
+    balanceField.classList.remove("bg-secondary", "bg-success", "bg-danger");
     balanceField.classList.add("bg-warning");
   } else if (balance > 0) {
-    balanceField.classList.remove("bg-secondary");
-    balanceField.classList.remove("bg-warning");
-    balanceField.classList.remove("bg-danger");
+    balanceField.classList.remove("bg-secondary", "bg-warning", "bg-danger");
     balanceField.classList.add("bg-success");
   } else if (balance < 0) {
-    balanceField.classList.remove("bg-secondary");
-    balanceField.classList.remove("bg-warning");
-    balanceField.classList.remove("bg-success");
+    balanceField.classList.remove("bg-secondary", "bg-warning", "bg-success");
     balanceField.classList.add("bg-danger");
   } else {
-    balanceField.classList.remove("bg-warning");
-    balanceField.classList.remove("bg-success");
-    balanceField.classList.remove("bg-danger");
+    balanceField.classList.remove("bg-warning", "bg-success", "bg-danger");
     balanceField.classList.add("bg-secondary");
   }
 };
@@ -169,13 +204,15 @@ function submitForms() {
   childDivsIncome.forEach((child, index) => {
     const name = child.getElementsByTagName("p")[0].textContent;
     const value = child.getElementsByTagName("p")[1].textContent;
-    arrIncomeItems[name] = parseInt(value);
+    const category = child.querySelector("select").value;
+    arrIncomeItems[name] = { value: parseInt(value), category };
   });
   const childDivsExpenses = expensesItemsContainer.querySelectorAll("div");
   childDivsExpenses.forEach((child, index) => {
     const name = child.getElementsByTagName("p")[0].textContent;
     const value = child.getElementsByTagName("p")[1].textContent;
-    arrExpensesItems[name] = parseInt(value);
+    const category = child.querySelector("select").value;
+    arrExpensesItems[name] = { value: parseInt(value), category };
   });
   const budgetName = document.getElementById("budgetName").value;
   const data = {
@@ -185,22 +222,22 @@ function submitForms() {
     budgetBalance: parseInt(balance),
   };
 
-  console.log('Sending data:', data); // Log data to the browser console
+  console.log("Sending data:", data); // Log data to the browser console
 
-  fetch('../database/sendData.php', {
-    method: 'POST',
+  fetch("../database/sendData.php", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   })
-      .then(response => response.json())
-      .then(responseData => {
-        console.log('Success:', responseData);
-        window.location.href = '../index.php';
+      .then((response) => response.json())
+      .then((responseData) => {
+        console.log("Success:", responseData);
+        window.location.href = "../index.php";
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.error("Error:", error);
       });
 }
 

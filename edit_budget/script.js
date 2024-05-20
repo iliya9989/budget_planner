@@ -9,9 +9,7 @@ const expensesItemName = document.getElementById("expensesItemName");
 const expensesItemValue = document.getElementById("expensesItemValue");
 // Containers for items
 const incomeItemsContainer = document.getElementById("incomeItemsContainer");
-const expensesItemsContainer = document.getElementById(
-  "expensesItemsContainer",
-);
+const expensesItemsContainer = document.getElementById("expensesItemsContainer");
 // "Total" fields
 const totalIncomeField = document.getElementById("totalIncomeField");
 const totalExpensesField = document.getElementById("totalExpensesField");
@@ -20,9 +18,7 @@ const balanceField = document.getElementById("balanceField");
 // Counting variables
 let balance = parseInt(document.getElementById("totalBalance").innerText);
 let totalIncome = parseInt(document.getElementById("totalIncome").innerText);
-let totalExpenses = parseInt(
-  document.getElementById("totalExpenses").innerText,
-);
+let totalExpenses = parseInt(document.getElementById("totalExpenses").innerText);
 totalIncomeField.innerText = `Total income: ${totalIncome}`;
 totalIncomeField.classList.remove("bg-secondary");
 totalIncomeField.classList.add("bg-success");
@@ -32,11 +28,7 @@ totalExpensesField.classList.add("bg-danger");
 
 const changeBalanceField = () => {
   balanceField.innerText = `Balance: ${balance}`;
-  if (
-    balance === 0 &&
-    incomeItemsContainer.hasChildNodes() &&
-    expensesItemsContainer.hasChildNodes()
-  ) {
+  if (balance === 0 && incomeItemsContainer.hasChildNodes() && expensesItemsContainer.hasChildNodes()) {
     balanceField.classList.remove("bg-secondary");
     balanceField.classList.remove("bg-success");
     balanceField.classList.remove("bg-danger");
@@ -61,61 +53,69 @@ const changeBalanceField = () => {
 
 changeBalanceField();
 
+// Function to fetch categories and return as options
+async function fetchCategories() {
+  try {
+    const response = await fetch("../database/get_categories.php");
+    const categories = await response.json();
+    return categories.map((category) => {
+      const option = document.createElement("option");
+      option.value = category.category_id;
+      option.textContent = category.category_name;
+      return option;
+    });
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+    return [];
+  }
+}
+
+// Function to validate category selection
+function validateCategorySelection() {
+  let valid = true;
+  const childDivsIncome = incomeItemsContainer.querySelectorAll("div");
+  childDivsIncome.forEach((child) => {
+    const category_id = child.getElementsByTagName("select")[0].value;
+    if (!category_id) {
+      alert("Please select a category for all income items.");
+      valid = false;
+    }
+  });
+
+  const childDivsExpenses = expensesItemsContainer.querySelectorAll("div");
+  childDivsExpenses.forEach((child) => {
+    const category_id = child.getElementsByTagName("select")[0].value;
+    if (!category_id) {
+      alert("Please select a category for all expense items.");
+      valid = false;
+    }
+  });
+
+  return valid;
+}
+
 // Submit event listener for income
-incomeSubmitButton.addEventListener("click", (event) => {
+incomeSubmitButton.addEventListener("click", async (event) => {
   event.preventDefault();
 
   // Check if the values are valid
-  if (
-    !incomeItemName.value ||
-    !parseInt(incomeItemValue.value) ||
-    parseInt(incomeItemValue.value) <= 0
-  ) {
+  if (!incomeItemName.value || !parseInt(incomeItemValue.value) || parseInt(incomeItemValue.value) <= 0) {
     incomeItemName.placeholder = "Please, enter valid values";
     throw new Error("Values are not valid");
   }
 
   // Creating an item
   const item = document.createElement("div");
-  item.classList.add(
-    "row",
-    "bg-success",
-    "border",
-    "rounded-3",
-    "p-3",
-    "my-1",
-    "shadow",
-    "text-light",
-    "justify-content-around",
-  );
+  item.classList.add("row", "bg-success", "border", "rounded-3", "p-3", "my-1", "shadow", "text-light", "justify-content-around");
 
   // Adding content to the item
   const itemName = document.createElement("p");
   itemName.innerText = incomeItemName.value;
-  itemName.classList.add(
-    "col-auto",
-    "my-auto",
-    "bg-light",
-    "border",
-    "rounded-5",
-    "text-success-emphasis",
-    "text-center",
-    "text-break",
-  );
+  itemName.classList.add("col-auto", "my-auto", "bg-light", "border", "rounded-5", "text-success-emphasis", "text-center", "text-break");
 
   const itemValue = document.createElement("p");
   itemValue.innerText = incomeItemValue.value;
-  itemValue.classList.add(
-    "col-auto",
-    "my-auto",
-    "bg-light",
-    "border",
-    "rounded-5",
-    "text-success-emphasis",
-    "text-center",
-    "text-break",
-    "ms-1",
-  );
+  itemValue.classList.add("col-auto", "my-auto", "bg-light", "border", "rounded-5", "text-success-emphasis", "text-center", "text-break", "ms-1");
 
   const itemDeleteButton = document.createElement("button");
   itemDeleteButton.classList.add("btn", "col-1");
@@ -136,6 +136,19 @@ incomeSubmitButton.addEventListener("click", (event) => {
   };
   itemDeleteButton.addEventListener("click", removeItem);
 
+  // Select menu with categories for items
+  const selectCategoryMenu = document.createElement("select");
+  selectCategoryMenu.classList.add("form-select", "col-auto", "w-25");
+  const defaultSelectOption = document.createElement("option");
+  defaultSelectOption.innerText = "Category";
+  defaultSelectOption.setAttribute("value", "");
+  defaultSelectOption.setAttribute("disabled", "");
+  defaultSelectOption.setAttribute("selected", "");
+  selectCategoryMenu.appendChild(defaultSelectOption);
+
+  const categoryOptions = await fetchCategories();
+  categoryOptions.forEach(option => selectCategoryMenu.appendChild(option));
+
   totalIncome += parseInt(itemValue.innerText);
   balance += parseInt(itemValue.innerText);
   totalIncomeField.innerText = `Total income: ${totalIncome}`;
@@ -145,66 +158,34 @@ incomeSubmitButton.addEventListener("click", (event) => {
   incomeItemValue.value = "";
   item.appendChild(itemName);
   item.appendChild(itemValue);
+  item.appendChild(selectCategoryMenu);
   item.appendChild(itemDeleteButton);
   incomeItemsContainer.appendChild(item);
   changeBalanceField();
 });
 
 // Submit event listener for expenses
-expensesSubmitButton.addEventListener("click", (event) => {
+expensesSubmitButton.addEventListener("click", async (event) => {
   event.preventDefault();
 
   // Check if the values are valid
-  if (
-    !expensesItemName.value ||
-    !parseInt(expensesItemValue.value) ||
-    parseInt(expensesItemValue.value) <= 0
-  ) {
+  if (!expensesItemName.value || !parseInt(expensesItemValue.value) || parseInt(expensesItemValue.value) <= 0) {
     expensesItemName.placeholder = "Please, enter valid values";
     throw new Error("Values are not valid");
   }
 
   // Creating an item
   const item = document.createElement("div");
-  item.classList.add(
-    "row",
-    "bg-danger",
-    "border",
-    "rounded-3",
-    "p-3",
-    "my-1",
-    "shadow",
-    "text-light",
-    "justify-content-around",
-  );
+  item.classList.add("row", "bg-danger", "border", "rounded-3", "p-3", "my-1", "shadow", "text-light", "justify-content-around");
 
   // Adding content to the item
   const itemName = document.createElement("p");
   itemName.innerText = expensesItemName.value;
-  itemName.classList.add(
-    "col-auto",
-    "my-auto",
-    "bg-light",
-    "border",
-    "rounded-5",
-    "text-danger-emphasis",
-    "text-center",
-    "text-break",
-  );
+  itemName.classList.add("col-auto", "my-auto", "bg-light", "border", "rounded-5", "text-danger-emphasis", "text-center", "text-break");
 
   const itemValue = document.createElement("p");
   itemValue.innerText = expensesItemValue.value;
-  itemValue.classList.add(
-    "col-auto",
-    "my-auto",
-    "bg-light",
-    "border",
-    "rounded-5",
-    "text-danger-emphasis",
-    "text-center",
-    "text-break",
-    "ms-1",
-  );
+  itemValue.classList.add("col-auto", "my-auto", "bg-light", "border", "rounded-5", "text-danger-emphasis", "text-center", "text-break", "ms-1");
 
   const itemDeleteButton = document.createElement("button");
   itemDeleteButton.classList.add("btn", "col-1");
@@ -225,6 +206,19 @@ expensesSubmitButton.addEventListener("click", (event) => {
   };
   itemDeleteButton.addEventListener("click", removeItem);
 
+  // Select menu with categories for items
+  const selectCategoryMenu = document.createElement("select");
+  selectCategoryMenu.classList.add("form-select", "col-auto", "w-25");
+  const defaultSelectOption = document.createElement("option");
+  defaultSelectOption.innerText = "Category";
+  defaultSelectOption.setAttribute("value", "");
+  defaultSelectOption.setAttribute("disabled", "");
+  defaultSelectOption.setAttribute("selected", "");
+  selectCategoryMenu.appendChild(defaultSelectOption);
+
+  const categoryOptions = await fetchCategories();
+  categoryOptions.forEach(option => selectCategoryMenu.appendChild(option));
+
   totalExpenses += parseInt(itemValue.innerText);
   balance -= parseInt(itemValue.innerText);
   totalExpensesField.innerText = `Total expenses: ${totalExpenses}`;
@@ -234,6 +228,7 @@ expensesSubmitButton.addEventListener("click", (event) => {
   expensesItemValue.value = "";
   item.appendChild(itemName);
   item.appendChild(itemValue);
+  item.appendChild(selectCategoryMenu);
   item.appendChild(itemDeleteButton);
   expensesItemsContainer.appendChild(item);
   changeBalanceField();
@@ -241,24 +236,27 @@ expensesSubmitButton.addEventListener("click", (event) => {
 
 // Function for sending budget data to index.html, which then sends them to the DB
 function submitForms() {
-  if (!incomeItemsContainer.hasChildNodes() || !expensesItemsContainer.hasChildNodes()) {
-    alert("Please add at least one income item and one expense item before saving.");
-    return;
+  if (!validateCategorySelection()) {
+    return; // Prevent submission if validation fails
   }
 
-  let arrIncomeItems = {};
-  let arrExpensesItems = {};
+  let arrIncomeItems = [];
+  let arrExpensesItems = [];
   const childDivsIncome = incomeItemsContainer.querySelectorAll("div");
   childDivsIncome.forEach((child, index) => {
+    const id = child.getAttribute("data-id");
     const name = child.getElementsByTagName("p")[0].textContent;
     const value = child.getElementsByTagName("p")[1].textContent;
-    arrIncomeItems[name] = parseInt(value);
+    const category_id = child.getElementsByTagName("select")[0].value;
+    arrIncomeItems.push({ id, name, value, category_id });
   });
   const childDivsExpenses = expensesItemsContainer.querySelectorAll("div");
   childDivsExpenses.forEach((child, index) => {
+    const id = child.getAttribute("data-id");
     const name = child.getElementsByTagName("p")[0].textContent;
     const value = child.getElementsByTagName("p")[1].textContent;
-    arrExpensesItems[name] = parseInt(value);
+    const category_id = child.getElementsByTagName("select")[0].value;
+    arrExpensesItems.push({ id, name, value, category_id });
   });
   const budgetName = document.getElementById("budgetName").value;
   const budget_id = parseInt(document.getElementById("budget_id").innerText);
@@ -292,17 +290,13 @@ function submitForms() {
 const saveTheBudgetButton = document.getElementById("saveTheBudgetButton");
 saveTheBudgetButton.addEventListener("click", submitForms);
 
-
 document.querySelectorAll(".deleteButtonIncome").forEach((button) => {
-  console.log("Button found:", button); // Log to verify button selection
   const itemValue = button.parentNode.querySelector("#itemValue").innerText;
   const removeItem = (event) => {
-    console.log("Remove item triggered"); // Log to verify the event is triggered
-
     totalIncome -= parseInt(itemValue);
     balance -= parseInt(itemValue);
     document.getElementById("totalIncomeField").innerText =
-      `Total income: ${totalIncome}`;
+        `Total income: ${totalIncome}`;
     event.target.parentElement.remove();
     button.removeEventListener("click", removeItem);
     if (totalIncome === 0) {
@@ -312,19 +306,15 @@ document.querySelectorAll(".deleteButtonIncome").forEach((button) => {
     changeBalanceField();
   };
   button.addEventListener("click", removeItem);
-  console.log("Event listener added to button"); // Log to verify listener is added
 });
 
 document.querySelectorAll(".deleteButtonExpenses").forEach((button) => {
-  console.log("Button found:", button); // Log to verify button selection
   const itemValue = button.parentNode.querySelector("#itemValue").innerText;
   const removeItem = (event) => {
-    console.log("Remove item triggered"); // Log to verify the event is triggered
-
     totalExpenses -= parseInt(itemValue);
     balance += parseInt(itemValue);
     document.getElementById("totalExpensesField").innerText =
-      `Total income: ${totalExpenses}`;
+        `Total expenses: ${totalExpenses}`;
     event.target.parentElement.remove();
     button.removeEventListener("click", removeItem);
     if (totalExpenses === 0) {
@@ -334,7 +324,6 @@ document.querySelectorAll(".deleteButtonExpenses").forEach((button) => {
     changeBalanceField();
   };
   button.addEventListener("click", removeItem);
-  console.log("Event listener added to button"); // Log to verify listener is added
 });
 
 // Function for deleting the budget

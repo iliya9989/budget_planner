@@ -7,6 +7,7 @@ $incomes = [];
 $expenses = [];
 $totalIncome = 0;
 $totalExpenses = 0;
+$categories = [];
 
 if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
     $budget_id = (int)$_GET['budget_id'];
@@ -26,12 +27,16 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
 
         // Query to get all incomes for the budget
         $getIncomesQuery = $db->prepare('SELECT 
+                i.income_id, 
                 i.income_name AS income_name, 
-                i.amount AS income_amount
+                i.amount AS income_amount,
+                ic.category_id
             FROM 
                 incomes i
             JOIN 
                 budget_incomes bi ON i.income_id = bi.income_id
+            LEFT JOIN 
+                income_categories ic ON i.income_id = ic.income_id
             WHERE 
                 bi.budget_id = :budget_id');
         $getIncomesQuery->bindValue(':budget_id', $budget_id, PDO::PARAM_INT);
@@ -40,17 +45,25 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
 
         // Query to get all expenses for the budget
         $getExpensesQuery = $db->prepare('SELECT 
+                e.expense_id, 
                 e.expense_name AS expense_name, 
-                e.cost AS expense_cost
+                e.cost AS expense_cost,
+                ec.category_id
             FROM 
                 expenses e
             JOIN 
                 budget_expenses be ON e.expense_id = be.expense_id
+            LEFT JOIN 
+                expense_categories ec ON e.expense_id = ec.expense_id
             WHERE 
                 be.budget_id = :budget_id');
         $getExpensesQuery->bindValue(':budget_id', $budget_id, PDO::PARAM_INT);
         $getExpensesQuery->execute();
         $expenses = $getExpensesQuery->fetchAll(PDO::FETCH_ASSOC);
+
+        $selectCategoriesQuery = $db->prepare('SELECT * FROM categories');
+        $selectCategoriesQuery->execute();
+        $categories = $selectCategoriesQuery->fetchAll();
 
     } catch (PDOException $e) {
         echo "Error: " . $e->getMessage();
@@ -58,9 +71,7 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
 } else {
     echo "Invalid or missing budget ID.";
 }
-
 ?>
-
 
 <!doctype html>
 <html lang="en">
@@ -74,7 +85,7 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
             crossorigin="anonymous"
     />
     <link rel="icon" href="../favicon.png"/>
-    <title>New Budget</title>
+    <title>Edit Budget</title>
 </head>
 <body class="bg-secondary-subtle">
 <div id="budget_id" style="display: none"><?= $_GET['budget_id'] ?></div>
@@ -107,6 +118,7 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                     <a id="deleteTheBudgetButton" class="btn btn-danger text-light"
                     >Delete the budget</a
                     >
+                    <a class="btn btn-secondary" href="..">Back</a>
                 </div>
             </form>
         </div>
@@ -164,13 +176,17 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                         foreach ($incomes as $income) {
                             $totalIncome += $income['income_amount'];
                             ?>
-                            <div class="row bg-success border rounded-3 p-3 my-1 shadow text-light justify-content-around">
+                            <div class="row bg-success border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= $income['income_id'] ?>">
                                 <p class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break"><?= $income['income_name'] ?></p>
-                                <p id='itemValue'
-                                   class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1"><?= $income['income_amount'] ?></p>
-                                <button class="deleteButtonIncome btn col-1"
-                                        style="justify-self: end; font-weight: bold;">X
-                                </button>
+                                <p id='itemValue' class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1"><?= $income['income_amount'] ?></p>
+                                <select class="form-select w-25">
+                                    <?php
+                                    foreach ($categories as $category) { ?>
+                                        <option value="<?= $category['category_id'] ?>" data-category-id="<?= $category['category_id'] ?>" <?= $category['category_id'] == $income['category_id'] ? 'selected' : '' ?>><?= $category['category_name'] ?></option>
+                                    <?php  }
+                                    ?>
+                                </select>
+                                <button class="deleteButtonIncome btn col-1" style="justify-self: end; font-weight: bold;">X</button>
                             </div>
                             <?php
                         }
@@ -229,12 +245,18 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                     foreach ($expenses as $expense) {
                         $totalExpenses += $expense['expense_cost'];
                         ?>
-                        <div class="row bg-danger border rounded-3 p-3 my-1 shadow text-light justify-content-around">
+                        <div class="row bg-danger border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= $expense['expense_id'] ?>">
                             <p class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break"><?= $expense['expense_name'] ?></p>
                             <p id='itemValue'
                                class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break ms-1"><?= $expense['expense_cost'] ?></p>
-                            <button class="deleteButtonExpenses btn col-1"
-                                    style="justify-self: end; font-weight: bold;">X
+                            <select class="form-select w-25">
+                                <?php
+                                foreach ($categories as $category) { ?>
+                                    <option value="<?= $category['category_id'] ?>" data-category-id="<?= $category['category_id'] ?>" <?= $category['category_id'] == $expense['category_id'] ? 'selected' : '' ?>><?= $category['category_name'] ?></option>
+                                <?php  }
+                                ?>
+                            </select>
+                            <button class="deleteButtonExpenses btn col-1" style="justify-self: end; font-weight: bold;">X
                             </button>
                         </div>
                         <?php

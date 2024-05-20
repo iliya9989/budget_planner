@@ -21,15 +21,15 @@
             <h1 class="h1">Welcome to Budget Planner!</h1>
             <p class="lead">Start by submitting an item</p>
           </div>
+
           <form>
             <div class="form-group">
               <label for="budgetName">Budget's name:</label>
               <input
-                class="form-control"
+                class="form-control w-25"
                 type="text"
                 name="budgetName"
                 id="budgetName"
-                style="width: 25%"
                 required
               />
             </div>
@@ -38,6 +38,7 @@
               <a id="saveTheBudgetButton" class="btn btn-primary text-light"
                 >Save the budget</a
               >
+              <a class="btn btn-secondary" href="..">Back</a>
             </div>
           </form>
         </div>
@@ -167,6 +168,6 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
   </body>
 </html>
