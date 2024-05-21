@@ -247,8 +247,7 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                         ?>
                         <div class="row bg-danger border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= $expense['expense_id'] ?>">
                             <p class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break"><?= $expense['expense_name'] ?></p>
-                            <p id='itemValue'
-                               class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break ms-1"><?= $expense['expense_cost'] ?></p>
+                            <p id='itemValue' class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break ms-1"><?= $expense['expense_cost'] ?></p>
                             <select class="form-select w-25">
                                 <?php
                                 foreach ($categories as $category) { ?>

@@ -40,6 +40,7 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
         <nav>
             <a class="btn btn-primary me-2" href="/create_budget">New Budget</a>
             <a class="btn btn-primary me-2" href="../categories">Manage categories</a>
+            <a class="btn btn-primary me-2" href="../incomes_and_expenses">Manage incomes and expenses</a>
             <a class="btn btn-secondary" href="/logout">Log out</a>
         </nav>
     </div>
