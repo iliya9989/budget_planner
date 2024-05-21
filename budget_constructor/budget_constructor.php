@@ -1,76 +1,28 @@
 <?php
 require '../database/db.php';
+session_start();
+$data = json_decode(file_get_contents('php://input'), true);
+if ($data) {
+    $_SESSION['data'] = $data;
+    echo json_encode(['status' => 'success']);
+    exit;
+}
 
-$budget_id = null;
-$budgetData = [];
-$incomes = [];
-$expenses = [];
+
+if (isset($_SESSION['data'])) {
+    $data = $_SESSION['data'];
+    unset($_SESSION['data']);
+} else {
+    echo "No data received";
+}
+
+//setting value outside of $data
 $totalIncome = 0;
 $totalExpenses = 0;
-$categories = [];
 
-if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
-    $budget_id = (int)$_GET['budget_id'];
-
-    try {
-        // Query to get budget details
-        $getBudgetDataQuery = $db->prepare('SELECT 
-                b.budget_name, 
-                b.budget_balance
-            FROM 
-                budgets b
-            WHERE 
-                b.budget_id = :budget_id');
-        $getBudgetDataQuery->bindValue(':budget_id', $budget_id, PDO::PARAM_INT);
-        $getBudgetDataQuery->execute();
-        $budgetData = $getBudgetDataQuery->fetch(PDO::FETCH_ASSOC);
-
-        // Query to get all incomes for the budget
-        $getIncomesQuery = $db->prepare('SELECT 
-                i.income_id, 
-                i.income_name AS income_name, 
-                i.amount AS income_amount,
-                ic.category_id
-            FROM 
-                incomes i
-            JOIN 
-                budget_incomes bi ON i.income_id = bi.income_id
-            LEFT JOIN 
-                income_categories ic ON i.income_id = ic.income_id
-            WHERE 
-                bi.budget_id = :budget_id');
-        $getIncomesQuery->bindValue(':budget_id', $budget_id, PDO::PARAM_INT);
-        $getIncomesQuery->execute();
-        $incomes = $getIncomesQuery->fetchAll(PDO::FETCH_ASSOC);
-
-        // Query to get all expenses for the budget
-        $getExpensesQuery = $db->prepare('SELECT 
-                e.expense_id, 
-                e.expense_name AS expense_name, 
-                e.cost AS expense_cost,
-                ec.category_id
-            FROM 
-                expenses e
-            JOIN 
-                budget_expenses be ON e.expense_id = be.expense_id
-            LEFT JOIN 
-                expense_categories ec ON e.expense_id = ec.expense_id
-            WHERE 
-                be.budget_id = :budget_id');
-        $getExpensesQuery->bindValue(':budget_id', $budget_id, PDO::PARAM_INT);
-        $getExpensesQuery->execute();
-        $expenses = $getExpensesQuery->fetchAll(PDO::FETCH_ASSOC);
-
-        $selectCategoriesQuery = $db->prepare('SELECT * FROM categories');
-        $selectCategoriesQuery->execute();
-        $categories = $selectCategoriesQuery->fetchAll();
-
-    } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
-    }
-} else {
-    echo "Invalid or missing budget ID.";
-}
+$selectCategoriesQuery = $db->prepare('SELECT * FROM categories');
+$selectCategoriesQuery->execute();
+$categories = $selectCategoriesQuery->fetchAll();
 ?>
 
 <!doctype html>
@@ -79,16 +31,15 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-            crossorigin="anonymous"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous"
     />
     <link rel="icon" href="../favicon.png"/>
     <title>Edit Budget</title>
 </head>
 <body class="bg-secondary-subtle">
-<div id="budget_id" style="display: none"><?= $_GET['budget_id'] ?></div>
 <div class="container">
     <!-- jumbotron -->
     <div class="row">
@@ -101,13 +52,12 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                 <div class="form-group">
                     <label for="budgetName">Budget's name:</label>
                     <input
-                            value="<?= $budgetData['budget_name'] ?>"
-                            class="form-control"
-                            type="text"
-                            name="budgetName"
-                            id="budgetName"
-                            style="width: 25%"
-                            required
+                        class="form-control"
+                        type="text"
+                        name="budgetName"
+                        id="budgetName"
+                        style="width: 25%"
+                        required
                     />
                 </div>
                 <div class="form-group">
@@ -118,7 +68,7 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                     <a id="deleteTheBudgetButton" class="btn btn-danger text-light"
                     >Delete the budget</a
                     >
-                    <a class="btn btn-secondary" href="..">Back</a>
+                    <a class="btn btn-secondary" href="../incomes_and_expenses">Back</a>
                 </div>
             </form>
         </div>
@@ -142,26 +92,26 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                     <form class="row">
                         <div class="col-6">
                             <input
-                                    id="incomeItemName"
-                                    type="text"
-                                    class="form-control my-4"
-                                    placeholder="Item"
-                                    required
+                                id="incomeItemName"
+                                type="text"
+                                class="form-control my-4"
+                                placeholder="Item"
+                                required
                             />
                         </div>
                         <div class="col-3">
                             <input
-                                    id="incomeItemValue"
-                                    type="number"
-                                    class="form-control my-4"
-                                    placeholder="Value"
-                                    required
+                                id="incomeItemValue"
+                                type="number"
+                                class="form-control my-4"
+                                placeholder="Value"
+                                required
                             />
                         </div>
                         <button
-                                id="submitIncome"
-                                type="submit"
-                                class="btn col-3 btn-info text-light my-4 shadow"
+                            id="submitIncome"
+                            type="submit"
+                            class="btn col-3 btn-info text-light my-4 shadow"
                         >
                             Submit
                         </button>
@@ -169,11 +119,11 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                 </div>
                 <div class="row">
                     <div
-                            id="incomeItemsContainer"
-                            class="col-7 mx-auto my-3 p-2"
+                        id="incomeItemsContainer"
+                        class="col-7 mx-auto my-3 p-2"
                     >
                         <?php
-                        foreach ($incomes as $income) {
+                        foreach ($data['checkedIncomeItems'] as $income) {
                             $totalIncome += $income['income_amount'];
                             ?>
                             <div class="row bg-success border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= $income['income_id'] ?>">
@@ -195,8 +145,8 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                 </div>
                 <div class="row">
                     <div
-                            id="totalIncomeField"
-                            class="col-7 mx-auto my-3 p-2 border rounded-3 bg-secondary text-light text-center"
+                        id="totalIncomeField"
+                        class="col-7 mx-auto my-3 p-2 border rounded-3 bg-secondary text-light text-center"
                     >
                         Total Income
                     </div>
@@ -212,37 +162,37 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                     <form class="row">
                         <div class="col-6">
                             <input
-                                    id="expensesItemName"
-                                    type="text"
-                                    class="form-control my-4"
-                                    placeholder="Item"
-                                    required
+                                id="expensesItemName"
+                                type="text"
+                                class="form-control my-4"
+                                placeholder="Item"
+                                required
                             />
                         </div>
                         <div class="col-3">
                             <input
-                                    id="expensesItemValue"
-                                    type="number"
-                                    class="form-control my-4"
-                                    placeholder="Value"
-                                    required
+                                id="expensesItemValue"
+                                type="number"
+                                class="form-control my-4"
+                                placeholder="Value"
+                                required
                             />
                         </div>
                         <button
-                                id="submitExpenses"
-                                type="submit"
-                                class="btn col-3 btn-info text-light my-4 shadow"
+                            id="submitExpenses"
+                            type="submit"
+                            class="btn col-3 btn-info text-light my-4 shadow"
                         >
                             Submit
                         </button>
                     </form>
                 </div>
                 <div
-                        id="expensesItemsContainer"
-                        class="col-7 mx-auto my-3 p-2"
+                    id="expensesItemsContainer"
+                    class="col-7 mx-auto my-3 p-2"
                 >
                     <?php
-                    foreach ($expenses as $expense) {
+                    foreach ($data['checkedExpenseItems'] as $expense) {
                         $totalExpenses += $expense['expense_cost'];
                         ?>
                         <div class="row bg-danger border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= $expense['expense_id'] ?>">
@@ -265,8 +215,8 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                 </div>
                 <div class="row">
                     <div
-                            id="totalExpensesField"
-                            class="col-7 mx-auto my-3 p-2 border rounded-3 bg-secondary text-light text-center"
+                        id="totalExpensesField"
+                        class="col-7 mx-auto my-3 p-2 border rounded-3 bg-secondary text-light text-center"
                     >
                         Total Expenses
                     </div>
@@ -277,8 +227,8 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
     </div>
     <div class="row">
         <div
-                id="balanceField"
-                class="col-5 bg-secondary text-light my-4 mx-auto p-3 border rounded-3 text-center"
+            id="balanceField"
+            class="col-5 bg-secondary text-light my-4 mx-auto p-3 border rounded-3 text-center"
         >
             Balance
         </div>
@@ -286,13 +236,13 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
     <!-- end of main -->
 </div>
 <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"
 ></script>
 <div id="totalIncome" style="display: none"><?= $totalIncome ?></div>
 <div id="totalExpenses" style="display: none"><?= $totalExpenses ?></div>
-<div id="totalBalance" style="display: none"><?= $budgetData['budget_balance'] ?></div>
+<div id="totalBalance" style="display: none"><?= $totalIncome - $totalExpenses ?></div>
 <script defer src="script.js"></script>
 </body>
 </html>

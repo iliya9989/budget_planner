@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/budget_constructor/budget_constructor.php" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/budgets/index.php" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/categories/index.php" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/create_budget/script.js" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/database/delete_items.php" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/database/sendData.php" dialect="MariaDB" />
+    <file url="file://$PROJECT_DIR$/database/update_items.php" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/edit_budget/edit_budget.php" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/incomes_and_expenses/index.php" dialect="MariaDB" />
     <file url="file://$PROJECT_DIR$/login/index.php" dialect="MariaDB" />

@@ -49,7 +49,7 @@ $expenseCategories = $selectExpenseCategoriesQuery->fetchAll();
     <div>
         <a class="btn btn-success me-2" id="saveButton">Save the list</a>
         <!-- TODO: make functionality for creating new budget with selected items -->
-        <a class="btn btn-primary me-2" id="saveButton">Add selected items to a new budget</a>
+        <a class="btn btn-primary me-2" id="constructBudgetButton">Add selected items to a new budget</a>
         <a class="btn btn-secondary" href="..">Back</a>
     </div>
 </header>
@@ -69,7 +69,7 @@ $expenseCategories = $selectExpenseCategoriesQuery->fetchAll();
                                 <?php
                                 foreach ($categories as $category) {
                                     foreach ($incomeCategories as $incomeCategory) {
-                                        if($income['expense_id'] === $incomeCategory['expense_id'] && $incomeCategory['category_id'] === $category['category_id']){
+                                        if($income['income_id'] === $incomeCategory['income_id'] && $incomeCategory['category_id'] === $category['category_id']){
                                             ?>
                                             <option selected value="<?= $category['category_id'] ?>" data-category-id="<?= $category['category_id'] ?>"><?= $category['category_name'] ?></option>
                                             <?php
