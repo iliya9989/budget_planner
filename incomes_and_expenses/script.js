@@ -18,7 +18,7 @@ let deleteExpensesIdsArray = [];
 document.querySelectorAll(".deleteButtonExpense").forEach((button) => {
   button.addEventListener("click", (event) => {
     deleteExpensesIdsArray.push(
-      parseInt(button.parentNode.getAttribute("data-id")),
+        parseInt(button.parentNode.getAttribute("data-id")),
     );
     event.target.parentNode.remove();
   });
@@ -27,8 +27,8 @@ document.querySelectorAll(".deleteButtonExpense").forEach((button) => {
 function save () {
   //send deleted items to delete_items.php
   let $deleteData = {
-    deleteIncomesIdsArray,
-    deleteExpensesIdsArray,
+    deleteIncomesIdsArray: deleteIncomesIdsArray,
+    deleteExpensesIdsArray: deleteExpensesIdsArray,
   };
   fetch("../database/delete_items.php",
       {
@@ -42,12 +42,13 @@ function save () {
           const responseData = JSON.parse(text);
           console.log("Response data:", responseData);
           if (responseData.status === "success") {
+            console.log("Items deleted successfully");
           } else {
-            alert("Failed to save items. Please try again.");
+            console.log("Failed to save items. Please try again.");
           }
         } catch (e) {
           console.error("Failed to parse response:", text);
-          alert("Failed to save items. Please try again.");
+          throw new Error("Failed to save items. Please try again.");
         }
       })
       .catch(error => {
@@ -113,7 +114,8 @@ function save () {
       .catch(error => {
         console.error("Error:", error);
       });
+  window.location.reload();
 }
-
+document.getElementById("saveButton").addEventListener("click", save);
 
 //TODO: selected with a checkbox incomes and expenses to a page like edit_budget but which sends the data to sendData.php
