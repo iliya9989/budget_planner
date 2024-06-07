@@ -8,11 +8,12 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
     $getBudgetDataQuery = $db->prepare('SELECT budget_id, budget_name, budget_balance 
                 FROM budgets 
                 WHERE user_id = :user_id');
-    $getBudgetDataQuery->bindParam(':user_id', $user_id);
+    $getBudgetDataQuery->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $getBudgetDataQuery->execute();
     $budgetData = $getBudgetDataQuery->fetchAll(PDO::FETCH_ASSOC);
 } else {
     header('Location: ../edit_budget.php');
+    exit();
 }
 
 ?>
@@ -34,7 +35,7 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
 <header class="d-flex align-items-center justify-content-between text-light p-3">
     <div>
         <h1>My Budgets</h1>
-        <h3>Logged in as: <?= $_SESSION['username'] ?> </h3>
+        <h3>Logged in as: <?= htmlspecialchars($_SESSION['username']) ?> </h3>
     </div>
     <div>
         <nav>
@@ -54,33 +55,37 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
                 <div id="incomeItemsContainer" class="col-7 mx-auto my-3 p-2">
                     <?php
                     foreach ($budgetData as $budget) {
+                        $budget_name = htmlspecialchars($budget['budget_name']);
+                        $budget_balance = htmlspecialchars($budget['budget_balance']);
+                        $budget_id = htmlspecialchars($budget['budget_id']);
+
                         if ($budget['budget_balance'] > 0) {
                             ?>
                             <div class="col-7 mx-auto my-3 p-2">
                                 <div class="row bg-success border rounded-3 p-3 my-1 shadow text-light justify-content-around">
-                                    <p class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break"><?= $budget['budget_name'] ?></p>
-                                    <p class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1"><?= $budget['budget_balance'] ?></p>
-                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget/edit_budget.php?budget_id=<?= htmlspecialchars($budget['budget_id']) ?>">Edit</a>
+                                    <p class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break"><?= $budget_name ?></p>
+                                    <p class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1"><?= $budget_balance ?></p>
+                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget/edit_budget.php?budget_id=<?= $budget_id ?>">Edit</a>
                                 </div>
                             </div>
                             <?php
-                        } else if ($budget['budget_balance'] < 0) {
+                        } elseif ($budget['budget_balance'] < 0) {
                             ?>
                             <div class="col-7 mx-auto my-3 p-2">
                                 <div class="row bg-danger border rounded-3 p-3 my-1 shadow text-light justify-content-around">
-                                    <p class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break"><?= $budget['budget_name'] ?></p>
-                                    <p class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break ms-1"><?= $budget['budget_balance'] ?></p>
-                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget/edit_budget.php?budget_id=<?= htmlspecialchars($budget['budget_id']) ?>">Edit</a>
+                                    <p class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break"><?= $budget_name ?></p>
+                                    <p class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break ms-1"><?= $budget_balance ?></p>
+                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget/edit_budget.php?budget_id=<?= $budget_id ?>">Edit</a>
                                 </div>
                             </div>
                             <?php
-                        } else if ($budget['budget_balance'] === 0) {
+                        } else {
                             ?>
                             <div class="col-7 mx-auto my-3 p-2">
                                 <div class="row bg-warning border rounded-3 p-3 my-1 shadow text-light justify-content-around">
-                                    <p class="col-auto my-auto bg-light border rounded-5 text-warning-emphasis text-center text-break"><?= $budget['budget_name'] ?></p>
-                                    <p class="col-auto my-auto bg-light border rounded-5 text-warning-emphasis text-center text-break ms-1"><?= $budget['budget_balance'] ?></p>
-                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget/edit_budget.php?budget_id=<?= htmlspecialchars($budget['budget_id']) ?>">Edit</a>
+                                    <p class="col-auto my-auto bg-light border rounded-5 text-warning-emphasis text-center text-break"><?= $budget_name ?></p>
+                                    <p class="col-auto my-auto bg-light border rounded-5 text-warning-emphasis text-center text-break ms-1"><?= $budget_balance ?></p>
+                                    <a class="btn btn-secondary col-3 fw-bold" href="../edit_budget/edit_budget.php?budget_id=<?= $budget_id ?>">Edit</a>
                                 </div>
                             </div>
                             <?php

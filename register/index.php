@@ -4,7 +4,6 @@ session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-
 if (!empty($_POST['email']) && !empty($_POST['password'])) {
     $email = trim($_POST['email']);
     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -15,7 +14,7 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
             echo "User with this E-mail already exists";
             die();
         } else {
-            $username = $_POST['username'];
+            $username = htmlspecialchars($_POST['username']);
             $hashedPassword = password_hash($_POST['password'], PASSWORD_DEFAULT);
             $registerUserQuery = $db->prepare('INSERT INTO users (email, password, username) VALUES (:email, :password, :username)');
             $registerUserQuery->bindParam(':email', $email, PDO::PARAM_STR);
@@ -26,19 +25,19 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
             $getUserIdQuery = $db->prepare('SELECT user_id FROM users WHERE email = :email');
             $getUserIdQuery->bindParam(':email', $email, PDO::PARAM_STR);
             $getUserIdQuery->execute();
-            $_SESSION['user_id'] = $getUserIdQuery->fetch(PDO::FETCH_ASSOC)['user_id'];
-            setcookie('user_id',$_SESSION['user_id'], time() + 86000, '/');
+            $_SESSION['user_id'] = htmlspecialchars($getUserIdQuery->fetch(PDO::FETCH_ASSOC)['user_id']);
+            setcookie('user_id', $_SESSION['user_id'], time() + 86000, '/');
             $_SESSION['username'] = $username;
             setcookie('username', $username, time() + 86000, '/');
 
             header('Location: ..');
+            exit();
         }
     } else {
         echo "Invalid email";
         die();
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -60,10 +59,10 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
         <div class="col-12 col-md-8 col-lg-6 mx-auto">
             <form method="post">
                 <div class="form-group">
-                    <div class="form-group">
-                        <label for="username" class="text-light">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
-                    </div>
+                    <label for="username" class="text-light">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
                     <label for="email" class="text-light">Email address</label>
                     <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Enter email" required>
                 </div>
@@ -78,6 +77,4 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
     </div>
 </div>
 </body>
-
 </html>
-

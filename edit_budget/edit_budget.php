@@ -62,13 +62,14 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
         $getExpensesQuery->execute();
         $expenses = $getExpensesQuery->fetchAll(PDO::FETCH_ASSOC);
 
+        // Query to get categories
         $selectCategoriesQuery = $db->prepare('SELECT * FROM categories WHERE user_id = :user_id');
-        $selectCategoriesQuery->bindValue('user_id', $_SESSION['user_id']);
+        $selectCategoriesQuery->bindValue(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
         $selectCategoriesQuery->execute();
-        $categories = $selectCategoriesQuery->fetchAll();
+        $categories = $selectCategoriesQuery->fetchAll(PDO::FETCH_ASSOC);
 
     } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
+        echo "Error: " . htmlspecialchars($e->getMessage());
     }
 } else {
     echo "Invalid or missing budget ID.";
@@ -90,7 +91,7 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
     <title>Edit Budget</title>
 </head>
 <body class="bg-secondary-subtle">
-<div id="budget_id" style="display: none"><?= $_GET['budget_id'] ?></div>
+<div id="budget_id" style="display: none"><?= htmlspecialchars($_GET['budget_id']) ?></div>
 <div class="container">
     <!-- jumbotron -->
     <div class="row">
@@ -103,7 +104,7 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                 <div class="form-group">
                     <label for="budgetName">Budget's name:</label>
                     <input
-                            value="<?= $budgetData['budget_name'] ?>"
+                            value="<?= htmlspecialchars($budgetData['budget_name']) ?>"
                             class="form-control"
                             type="text"
                             name="budgetName"
@@ -178,13 +179,13 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                         foreach ($incomes as $income) {
                             $totalIncome += $income['income_amount'];
                             ?>
-                            <div class="row bg-success border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= $income['income_id'] ?>">
-                                <p class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break"><?= $income['income_name'] ?></p>
-                                <p id='itemValue' class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1"><?= $income['income_amount'] ?></p>
+                            <div class="row bg-success border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= htmlspecialchars($income['income_id']) ?>">
+                                <p class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break"><?= htmlspecialchars($income['income_name']) ?></p>
+                                <p id='itemValue' class="col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1"><?= htmlspecialchars($income['income_amount']) ?></p>
                                 <select class="form-select w-25">
                                     <?php
                                     foreach ($categories as $category) { ?>
-                                        <option value="<?= $category['category_id'] ?>" data-category-id="<?= $category['category_id'] ?>" <?= $category['category_id'] == $income['category_id'] ? 'selected' : '' ?>><?= $category['category_name'] ?></option>
+                                        <option value="<?= htmlspecialchars($category['category_id']) ?>" data-category-id="<?= htmlspecialchars($category['category_id']) ?>" <?= $category['category_id'] == $income['category_id'] ? 'selected' : '' ?>><?= htmlspecialchars($category['category_name']) ?></option>
                                     <?php  }
                                     ?>
                                 </select>
@@ -247,18 +248,17 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
                     foreach ($expenses as $expense) {
                         $totalExpenses += $expense['expense_cost'];
                         ?>
-                        <div class="row bg-danger border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= $expense['expense_id'] ?>">
-                            <p class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break"><?= $expense['expense_name'] ?></p>
-                            <p id='itemValue' class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break ms-1"><?= $expense['expense_cost'] ?></p>
+                        <div class="row bg-danger border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= htmlspecialchars($expense['expense_id']) ?>">
+                            <p class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break"><?= htmlspecialchars($expense['expense_name']) ?></p>
+                            <p id='itemValue' class="col-auto my-auto bg-light border rounded-5 text-danger-emphasis text-center text-break ms-1"><?= htmlspecialchars($expense['expense_cost']) ?></p>
                             <select class="form-select w-25">
                                 <?php
                                 foreach ($categories as $category) { ?>
-                                    <option value="<?= $category['category_id'] ?>" data-category-id="<?= $category['category_id'] ?>" <?= $category['category_id'] == $expense['category_id'] ? 'selected' : '' ?>><?= $category['category_name'] ?></option>
+                                    <option value="<?= htmlspecialchars($category['category_id']) ?>" data-category-id="<?= htmlspecialchars($category['category_id']) ?>" <?= $category['category_id'] == $expense['category_id'] ? 'selected' : '' ?>><?= htmlspecialchars($category['category_name']) ?></option>
                                 <?php  }
                                 ?>
                             </select>
-                            <button class="deleteButtonExpenses btn col-1" style="justify-self: end; font-weight: bold;">X
-                            </button>
+                            <button class="deleteButtonExpenses btn col-1" style="justify-self: end; font-weight: bold;">X</button>
                         </div>
                         <?php
                     }
@@ -292,9 +292,9 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"
 ></script>
-<div id="totalIncome" style="display: none"><?= $totalIncome ?></div>
-<div id="totalExpenses" style="display: none"><?= $totalExpenses ?></div>
-<div id="totalBalance" style="display: none"><?= $budgetData['budget_balance'] ?></div>
+<div id="totalIncome" style="display: none"><?= htmlspecialchars($totalIncome) ?></div>
+<div id="totalExpenses" style="display: none"><?= htmlspecialchars($totalExpenses) ?></div>
+<div id="totalBalance" style="display: none"><?= htmlspecialchars($budgetData['budget_balance']) ?></div>
 <script defer src="script.js"></script>
 </body>
 </html>

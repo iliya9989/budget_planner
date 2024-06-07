@@ -3,36 +3,36 @@ session_start();
 require '../database/db.php';
 
 $user_id = $_SESSION['user_id'];
-//selecting expenses
+
+// Selecting expenses
 $selectExpensesQuery = $db->prepare('SELECT * FROM expenses WHERE user_id = :user_id');
-$selectExpensesQuery->bindValue(':user_id', $user_id);
+$selectExpensesQuery->bindValue(':user_id', $user_id, PDO::PARAM_INT);
 $selectExpensesQuery->execute();
-$expenses = $selectExpensesQuery->fetchAll();
+$expenses = $selectExpensesQuery->fetchAll(PDO::FETCH_ASSOC);
 
-//select incomes
+// Selecting incomes
 $selectIncomesQuery = $db->prepare('SELECT * FROM incomes WHERE user_id = :user_id');
-$selectIncomesQuery->bindValue(':user_id', $user_id);
+$selectIncomesQuery->bindValue(':user_id', $user_id, PDO::PARAM_INT);
 $selectIncomesQuery->execute();
-$incomes = $selectIncomesQuery->fetchAll();
+$incomes = $selectIncomesQuery->fetchAll(PDO::FETCH_ASSOC);
 
-//select categories
+// Selecting categories
 $selectCategoriesQuery = $db->prepare('SELECT * FROM categories WHERE user_id = :user_id');
-$selectCategoriesQuery->bindValue(':user_id', $user_id);
+$selectCategoriesQuery->bindValue(':user_id', $user_id, PDO::PARAM_INT);
 $selectCategoriesQuery->execute();
-$categories = $selectCategoriesQuery->fetchAll();
+$categories = $selectCategoriesQuery->fetchAll(PDO::FETCH_ASSOC);
 
-//select income categories
+// Selecting income categories
 $selectIncomeCategoriesQuery = $db->prepare('SELECT * FROM income_categories WHERE user_id = :user_id');
-$selectIncomeCategoriesQuery->bindValue(':user_id', $user_id);
+$selectIncomeCategoriesQuery->bindValue(':user_id', $user_id, PDO::PARAM_INT);
 $selectIncomeCategoriesQuery->execute();
-$incomeCategories = $selectIncomeCategoriesQuery->fetchAll();
+$incomeCategories = $selectIncomeCategoriesQuery->fetchAll(PDO::FETCH_ASSOC);
 
-//select expense categories
+// Selecting expense categories
 $selectExpenseCategoriesQuery = $db->prepare('SELECT * FROM expense_categories WHERE user_id = :user_id');
-$selectExpenseCategoriesQuery->bindValue(':user_id', $user_id);
+$selectExpenseCategoriesQuery->bindValue(':user_id', $user_id, PDO::PARAM_INT);
 $selectExpenseCategoriesQuery->execute();
-$expenseCategories = $selectExpenseCategoriesQuery->fetchAll();
-
+$expenseCategories = $selectExpenseCategoriesQuery->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -68,20 +68,20 @@ $expenseCategories = $selectExpenseCategoriesQuery->fetchAll();
                 <div id="incomeItemsContainer" class="col-4 mx-auto my-3 p-2">
                     <h3 class="text-center">Incomes</h3>
                     <?php foreach ($incomes as $income) { ?>
-                        <div class="income-item row bg-success border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= $income['income_id'] ?>">
-                            <input value="<?= $income['income_name'] ?>" type="text" class="incomeName w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break">
-                            <input value="<?= $income['amount'] ?>" id='itemValue' class="w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1">
+                        <div class="income-item row bg-success border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= htmlspecialchars($income['income_id']) ?>">
+                            <input value="<?= htmlspecialchars($income['income_name']) ?>" type="text" class="incomeName w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break">
+                            <input value="<?= htmlspecialchars($income['amount']) ?>" id='itemValue' class="w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1">
                             <select class="form-select w-25">
                                 <?php
                                 foreach ($categories as $category) {
                                     foreach ($incomeCategories as $incomeCategory) {
                                         if($income['income_id'] === $incomeCategory['income_id'] && $incomeCategory['category_id'] === $category['category_id']){
                                             ?>
-                                            <option selected value="<?= $category['category_id'] ?>" data-category-id="<?= $category['category_id'] ?>"><?= $category['category_name'] ?></option>
+                                            <option selected value="<?= htmlspecialchars($category['category_id']) ?>" data-category-id="<?= htmlspecialchars($category['category_id']) ?>"><?= htmlspecialchars($category['category_name']) ?></option>
                                             <?php
                                         } else {
                                             ?>
-                                            <option value="<?= $category['category_id'] ?>" data-category-id="<?= $category['category_id'] ?>"><?= $category['category_name'] ?></option>
+                                            <option value="<?= htmlspecialchars($category['category_id']) ?>" data-category-id="<?= htmlspecialchars($category['category_id']) ?>"><?= htmlspecialchars($category['category_name']) ?></option>
                                             <?php
                                         }
                                     }
@@ -97,20 +97,20 @@ $expenseCategories = $selectExpenseCategoriesQuery->fetchAll();
                 <div id="expenseItemsContainer" class="col-4 mx-auto my-3 p-2">
                     <h3 class="text-center">Expenses</h3>
                     <?php foreach ($expenses as $expense) { ?>
-                        <div class="expense-item row bg-danger border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= $expense['expense_id'] ?>">
-                            <input value="<?= $expense['expense_name'] ?>" type="text" class="expenseName w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break">
-                            <input value="<?= $expense['cost'] ?>" id='itemValue' class="w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1">
+                        <div class="expense-item row bg-danger border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= htmlspecialchars($expense['expense_id']) ?>">
+                            <input value="<?= htmlspecialchars($expense['expense_name']) ?>" type="text" class="expenseName w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break">
+                            <input value="<?= htmlspecialchars($expense['cost']) ?>" id='itemValue' class="w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1">
                             <select class="form-select w-25">
                                 <?php
                                 foreach ($categories as $category) {
                                     foreach ($expenseCategories as $expenseCategory) {
                                         if($expense['expense_id'] === $expenseCategory['expense_id'] && $expenseCategory['category_id'] === $category['category_id']){
                                             ?>
-                                            <option selected value="<?= $category['category_id'] ?>" data-category-id="<?= $category['category_id'] ?>"><?= $category['category_name'] ?></option>
+                                            <option selected value="<?= htmlspecialchars($category['category_id']) ?>" data-category-id="<?= htmlspecialchars($category['category_id']) ?>"><?= htmlspecialchars($category['category_name']) ?></option>
                                             <?php
                                         } else {
                                             ?>
-                                            <option value="<?= $category['category_id'] ?>" data-category-id="<?= $category['category_id'] ?>"><?= $category['category_name'] ?></option>
+                                            <option value="<?= htmlspecialchars($category['category_id']) ?>" data-category-id="<?= htmlspecialchars($category['category_id']) ?>"><?= htmlspecialchars($category['category_name']) ?></option>
                                             <?php
                                         }
                                     }

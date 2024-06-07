@@ -4,7 +4,7 @@ require '../database/db.php';
 
 $user_id = $_SESSION['user_id'];
 $selectCategoriesQuery = $db->prepare('SELECT * FROM categories WHERE user_id = :user_id');
-$selectCategoriesQuery->bindParam(':user_id', $user_id);
+$selectCategoriesQuery->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 $selectCategoriesQuery->execute();
 $categories = $selectCategoriesQuery->fetchAll(PDO::FETCH_ASSOC);
 
@@ -17,10 +17,10 @@ if ($selectCategoriesQuery->rowCount() > 0) {
 
     // Prepare queries for checking categories
     $checkIncomeCategoryQuery = $db->prepare('SELECT category_id FROM income_categories WHERE category_id = :category_id');
-    $checkIncomeCategoryQuery->bindParam('category_id', $category_id, PDO::PARAM_INT);
+    $checkIncomeCategoryQuery->bindParam(':category_id', $category_id, PDO::PARAM_INT);
 
     $checkExpenseCategoryQuery = $db->prepare('SELECT category_id FROM expense_categories WHERE category_id = :category_id');
-    $checkExpenseCategoryQuery->bindParam('category_id', $category_id, PDO::PARAM_INT);
+    $checkExpenseCategoryQuery->bindParam(':category_id', $category_id, PDO::PARAM_INT);
 
     foreach ($categories as $category) {
         $category_id = $category['category_id'];
@@ -34,14 +34,29 @@ if ($selectCategoriesQuery->rowCount() > 0) {
         $isExpenseCategory = $checkExpenseCategoryQuery->fetch();
 
         if ($isIncomeCategory && $isExpenseCategory) {
-            array_push($incomeCategories, ['category_id' => $category['category_id'], 'category_name' => $category['category_name']]);
-            array_push($expenseCategories, ['category_id' => $category['category_id'], 'category_name' => $category['category_name']]);
+            array_push($incomeCategories, [
+                'category_id' => htmlspecialchars($category['category_id']),
+                'category_name' => htmlspecialchars($category['category_name'])
+            ]);
+            array_push($expenseCategories, [
+                'category_id' => htmlspecialchars($category['category_id']),
+                'category_name' => htmlspecialchars($category['category_name'])
+            ]);
         } elseif ($isIncomeCategory) {
-            array_push($incomeCategories, ['category_id' => $category['category_id'], 'category_name' => $category['category_name']]);
+            array_push($incomeCategories, [
+                'category_id' => htmlspecialchars($category['category_id']),
+                'category_name' => htmlspecialchars($category['category_name'])
+            ]);
         } elseif ($isExpenseCategory) {
-            array_push($expenseCategories, ['category_id' => $category['category_id'], 'category_name' => $category['category_name']]);
+            array_push($expenseCategories, [
+                'category_id' => htmlspecialchars($category['category_id']),
+                'category_name' => htmlspecialchars($category['category_name'])
+            ]);
         } else {
-            array_push($unusedCategories, ['category_id' => $category['category_id'], 'category_name' => $category['category_name']]);
+            array_push($unusedCategories, [
+                'category_id' => htmlspecialchars($category['category_id']),
+                'category_name' => htmlspecialchars($category['category_name'])
+            ]);
         }
     }
 }

@@ -15,27 +15,27 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
         $getHashedPasswordQuery->execute();
         $hashedPassword = $getHashedPasswordQuery->fetch(PDO::FETCH_ASSOC)['password'];
 
-        if (password_verify($_POST['password'],$hashedPassword)) {
+        if (password_verify($_POST['password'], $hashedPassword)) {
             $getUserIdQuery = $db->prepare('SELECT user_id FROM users WHERE email = :email');
             $getUserIdQuery->bindParam(':email', $email, PDO::PARAM_STR);
             $getUserIdQuery->execute();
-            $_SESSION['user_id'] = $getUserIdQuery->fetch(PDO::FETCH_ASSOC)['user_id'];
-            setcookie('user_id',$_SESSION['user_id'], time() + 86000,'/');
+            $_SESSION['user_id'] = htmlspecialchars($getUserIdQuery->fetch(PDO::FETCH_ASSOC)['user_id']);
+            setcookie('user_id', $_SESSION['user_id'], time() + 86000, '/');
 
             $getUsername = $db->prepare('SELECT username FROM users WHERE email = :email');
             $getUsername->bindParam(':email', $email, PDO::PARAM_STR);
             $getUsername->execute();
-            $username = $getUsername->fetch(PDO::FETCH_ASSOC)['username'];
+            $username = htmlspecialchars($getUsername->fetch(PDO::FETCH_ASSOC)['username']);
             $_SESSION['username'] = $username;
-            setcookie('username', $username, time() + 86000,'/');
+            setcookie('username', $username, time() + 86000, '/');
 
             header('Location: ..');
+            exit();
         } else {
             echo "<script type='text/javascript'>alert('Wrong password');</script>";
         }
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -71,6 +71,4 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
     </div>
 </div>
 </body>
-
 </html>
-
