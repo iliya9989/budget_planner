@@ -50,34 +50,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $budget_id = $db->lastInsertId();
 
         // Prepare statements for incomes and expenses
-        $stmtIncome = $db->prepare("INSERT INTO incomes (income_name, amount) VALUES (?, ?)");
-        $stmtExpense = $db->prepare("INSERT INTO expenses (expense_name, cost) VALUES (?, ?)");
+        $stmtIncome = $db->prepare("INSERT INTO incomes (user_id, income_name, amount) VALUES (?, ?, ?)");
+        $stmtExpense = $db->prepare("INSERT INTO expenses (user_id, expense_name, cost) VALUES (?, ?, ?)");
 
         // Prepare statements for linking incomes and expenses to the budget
-        $stmtBudgetIncome = $db->prepare("INSERT INTO budget_incomes (budget_id, income_id) VALUES (?, ?)");
-        $stmtBudgetExpense = $db->prepare("INSERT INTO budget_expenses (budget_id, expense_id) VALUES (?, ?)");
+        $stmtBudgetIncome = $db->prepare("INSERT INTO budget_incomes (user_id, budget_id, income_id) VALUES (?, ?, ?)");
+        $stmtBudgetExpense = $db->prepare("INSERT INTO budget_expenses (user_id, budget_id, expense_id) VALUES (?, ?, ?)");
 
         // Prepare statements for linking categories to incomes and expenses
-        $stmtIncomeCategory = $db->prepare("INSERT INTO income_categories (income_id, category_id) VALUES (?, ?)");
-        $stmtExpenseCategory = $db->prepare("INSERT INTO expense_categories (expense_id, category_id) VALUES (?, ?)");
+        $stmtIncomeCategory = $db->prepare("INSERT INTO income_categories (user_id, income_id, category_id) VALUES (?, ?, ?)");
+        $stmtExpenseCategory = $db->prepare("INSERT INTO expense_categories (user_id, expense_id, category_id) VALUES (?, ?, ?)");
 
         // Insert income items, link them to the budget and their categories
         foreach ($data['incomeItems'] as $name => $details) {
-            $stmtIncome->execute([$name, $details['value']]);
+            $stmtIncome->execute([$user_id, $name, $details['value']]);
             $income_id = $db->lastInsertId();
-            $stmtBudgetIncome->execute([$budget_id, $income_id]);
+            $stmtBudgetIncome->execute([$user_id, $budget_id, $income_id]);
             if ($details['category']) {
-                $stmtIncomeCategory->execute([$income_id, $details['category']]);
+                $stmtIncomeCategory->execute([$user_id, $income_id, $details['category']]);
             }
         }
 
         // Insert expense items, link them to the budget and their categories
         foreach ($data['expensesItems'] as $name => $details) {
-            $stmtExpense->execute([$name, $details['value']]);
+            $stmtExpense->execute([$user_id, $name, $details['value']]);
             $expense_id = $db->lastInsertId();
-            $stmtBudgetExpense->execute([$budget_id, $expense_id]);
+            $stmtBudgetExpense->execute([$user_id, $budget_id, $expense_id]);
             if ($details['category']) {
-                $stmtExpenseCategory->execute([$expense_id, $details['category']]);
+                $stmtExpenseCategory->execute([$user_id, $expense_id, $details['category']]);
             }
         }
 

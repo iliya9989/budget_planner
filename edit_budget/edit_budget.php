@@ -1,4 +1,5 @@
 <?php
+session_start();
 require '../database/db.php';
 
 $budget_id = null;
@@ -61,7 +62,8 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
         $getExpensesQuery->execute();
         $expenses = $getExpensesQuery->fetchAll(PDO::FETCH_ASSOC);
 
-        $selectCategoriesQuery = $db->prepare('SELECT * FROM categories');
+        $selectCategoriesQuery = $db->prepare('SELECT * FROM categories WHERE user_id = :user_id');
+        $selectCategoriesQuery->bindValue('user_id', $_SESSION['user_id']);
         $selectCategoriesQuery->execute();
         $categories = $selectCategoriesQuery->fetchAll();
 

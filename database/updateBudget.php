@@ -1,4 +1,5 @@
 <?php
+session_start();
 require '../database/db.php';
 
 // Get the raw POST data
@@ -49,7 +50,7 @@ if ($data) {
                 throw new PDOException("Category ID {$incomeItem['category_id']} does not exist.");
             }
 
-            if (isset($incomeItem['id']) && in_array($incomeItem['id'], $existingIncomes)) {
+            if (isset($incomeItem['id']) && in_array($incomeItem['id'], $existingIncomes, $incomeItem['category_id'])) {
                 // Update existing income
                 $updateIncomeQuery = $db->prepare('UPDATE incomes SET income_name = :income_name, amount = :amount WHERE income_id = :income_id');
                 $updateIncomeQuery->bindValue(':income_name', $incomeItem['name'], PDO::PARAM_STR);
@@ -63,23 +64,40 @@ if ($data) {
                 $updateIncomeCategoryQuery->execute();
 
                 $incomeIdsToKeep[] = $incomeItem['id'];
+            } else if (!isset($incomeItem['category_id'])) {
+                $updateIncomeQuery = $db->prepare('UPDATE incomes SET income_name = :income_name, amount = :amount WHERE income_id = :income_id');
+                $updateIncomeQuery->bindValue(':income_name', $incomeItem['name'], PDO::PARAM_STR);
+                $updateIncomeQuery->bindValue(':amount', $incomeItem['value'], PDO::PARAM_INT);
+                $updateIncomeQuery->bindValue(':income_id', $incomeItem['id'], PDO::PARAM_INT);
+                $updateIncomeQuery->execute();
+
+                $insertIncomeCategoryQuery = $db->prepare('INSERT INTO income_categories (income_id, category_id, user_id) VALUES (:income_id, :category_id, :user_id)');
+                $insertIncomeCategoryQuery->bindValue(':income_id', $incomeItem['id'], PDO::PARAM_INT);
+                $insertIncomeCategoryQuery->bindValue(':category_id', $incomeItem['category_id'], PDO::PARAM_INT);
+                $insertIncomeCategoryQuery->bindValue('user_id', $_SESSION['user_id']);
+                $insertIncomeCategoryQuery->execute();
+
+                $incomeIdsToKeep[] = $incomeItem['id'];
             } else {
                 // Insert new income
-                $insertIncomeQuery = $db->prepare('INSERT INTO incomes (income_name, amount) VALUES (:income_name, :amount)');
+                $insertIncomeQuery = $db->prepare('INSERT INTO incomes (income_name, amount, user_id) VALUES (:income_name, :amount, :user_id)');
                 $insertIncomeQuery->bindValue(':income_name', $incomeItem['name'], PDO::PARAM_STR);
                 $insertIncomeQuery->bindValue(':amount', $incomeItem['value'], PDO::PARAM_INT);
+                $insertIncomeQuery->bindValue('user_id', $_SESSION['user_id']);
                 $insertIncomeQuery->execute();
 
                 $income_id = $db->lastInsertId();
 
-                $insertBudgetIncomeQuery = $db->prepare('INSERT INTO budget_incomes (budget_id, income_id) VALUES (:budget_id, :income_id)');
+                $insertBudgetIncomeQuery = $db->prepare('INSERT INTO budget_incomes (budget_id, income_id, user_id) VALUES (:budget_id, :income_id, :user_id)');
                 $insertBudgetIncomeQuery->bindValue(':budget_id', $budget_id, PDO::PARAM_INT);
                 $insertBudgetIncomeQuery->bindValue(':income_id', $income_id, PDO::PARAM_INT);
+                $insertBudgetIncomeQuery->bindValue('user_id', $_SESSION['user_id']);
                 $insertBudgetIncomeQuery->execute();
 
-                $insertIncomeCategoryQuery = $db->prepare('INSERT INTO income_categories (income_id, category_id) VALUES (:income_id, :category_id)');
+                $insertIncomeCategoryQuery = $db->prepare('INSERT INTO income_categories (income_id, category_id, user_id) VALUES (:income_id, :category_id, :user_id)');
                 $insertIncomeCategoryQuery->bindValue(':income_id', $income_id, PDO::PARAM_INT);
                 $insertIncomeCategoryQuery->bindValue(':category_id', $incomeItem['category_id'], PDO::PARAM_INT);
+                $insertIncomeCategoryQuery->bindValue('user_id', $_SESSION['user_id']);
                 $insertIncomeCategoryQuery->execute();
 
                 $incomeIdsToKeep[] = $income_id;
@@ -107,7 +125,7 @@ if ($data) {
                 throw new PDOException("Category ID {$expenseItem['category_id']} does not exist.");
             }
 
-            if (isset($expenseItem['id']) && in_array($expenseItem['id'], $existingExpenses)) {
+            if (isset($expenseItem['id']) && in_array($expenseItem['id'], $existingExpenses, $expenseItem['category_id'])) {
                 // Update existing expense
                 $updateExpenseQuery = $db->prepare('UPDATE expenses SET expense_name = :expense_name, cost = :cost WHERE expense_id = :expense_id');
                 $updateExpenseQuery->bindValue(':expense_name', $expenseItem['name'], PDO::PARAM_STR);
@@ -121,23 +139,40 @@ if ($data) {
                 $updateExpenseCategoryQuery->execute();
 
                 $expenseIdsToKeep[] = $expenseItem['id'];
+            } else if (!isset($expenseItem['category_id'])) {
+                $updateExpenseQuery = $db->prepare('UPDATE expenses SET expense_name = :expense_name, cost = :cost WHERE expense_id = :expense_id');
+                $updateExpenseQuery->bindValue(':expense_name', $expenseItem['name'], PDO::PARAM_STR);
+                $updateExpenseQuery->bindValue(':cost', $expenseItem['value'], PDO::PARAM_INT);
+                $updateExpenseQuery->bindValue(':expense_id', $expenseItem['id'], PDO::PARAM_INT);
+                $updateExpenseQuery->execute();
+
+                $insertExpenseCategoryQuery = $db->prepare('INSERT INTO expense_categories (expense_id, category_id, user_id) VALUES (:expense_id, :category_id, :user_id)');
+                $insertExpenseCategoryQuery->bindValue(':expense_id', $expenseItem['id'], PDO::PARAM_INT);
+                $insertExpenseCategoryQuery->bindValue(':category_id', $expenseItem['category_id'], PDO::PARAM_INT);
+                $insertExpenseCategoryQuery->bindValue('user_id', $_SESSION['user_id']);
+                $insertExpenseCategoryQuery->execute();
+
+                $expenseIdsToKeep[] = $expenseItem['id'];
             } else {
                 // Insert new expense
-                $insertExpenseQuery = $db->prepare('INSERT INTO expenses (expense_name, cost) VALUES (:expense_name, :cost)');
+                $insertExpenseQuery = $db->prepare('INSERT INTO expenses (expense_name, cost, user_id) VALUES (:expense_name, :cost, :user_id)');
                 $insertExpenseQuery->bindValue(':expense_name', $expenseItem['name'], PDO::PARAM_STR);
                 $insertExpenseQuery->bindValue(':cost', $expenseItem['value'], PDO::PARAM_INT);
+                $insertExpenseQuery->bindValue('user_id', $_SESSION['user_id']);
                 $insertExpenseQuery->execute();
 
                 $expense_id = $db->lastInsertId();
 
-                $insertBudgetExpenseQuery = $db->prepare('INSERT INTO budget_expenses (budget_id, expense_id) VALUES (:budget_id, :expense_id)');
+                $insertBudgetExpenseQuery = $db->prepare('INSERT INTO budget_expenses (budget_id, expense_id, user_id) VALUES (:budget_id, :expense_id, :user_id)');
                 $insertBudgetExpenseQuery->bindValue(':budget_id', $budget_id, PDO::PARAM_INT);
                 $insertBudgetExpenseQuery->bindValue(':expense_id', $expense_id, PDO::PARAM_INT);
+                $insertBudgetExpenseQuery->bindValue('user_id', $_SESSION['user_id']);
                 $insertBudgetExpenseQuery->execute();
 
-                $insertExpenseCategoryQuery = $db->prepare('INSERT INTO expense_categories (expense_id, category_id) VALUES (:expense_id, :category_id)');
+                $insertExpenseCategoryQuery = $db->prepare('INSERT INTO expense_categories (expense_id, category_id, user_id) VALUES (:expense_id, :category_id, :user_id)');
                 $insertExpenseCategoryQuery->bindValue(':expense_id', $expense_id, PDO::PARAM_INT);
                 $insertExpenseCategoryQuery->bindValue(':category_id', $expenseItem['category_id'], PDO::PARAM_INT);
+                $insertExpenseCategoryQuery->bindValue('user_id', $_SESSION['user_id']);
                 $insertExpenseCategoryQuery->execute();
 
                 $expenseIdsToKeep[] = $expense_id;

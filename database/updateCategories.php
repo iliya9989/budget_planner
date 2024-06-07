@@ -1,4 +1,5 @@
 <?php
+session_start();
 require '../database/db.php';
 
 // Enable error logging
@@ -22,7 +23,8 @@ if ($data) {
 
         // Handle new categories
         if (isset($data['newCategories']) && !empty($data['newCategories'])) {
-            $insertCategoryQuery = $db->prepare('INSERT INTO categories (category_name) VALUES (:category_name)');
+            $insertCategoryQuery = $db->prepare('INSERT INTO categories (category_name, user_id) VALUES (:category_name, :user_id)');
+            $insertCategoryQuery->bindValue(':user_id', $_SESSION['user_id']);
             foreach ($data['newCategories'] as $newCategory) {
                 error_log("Inserting new category: " . $newCategory['name']);
                 $insertCategoryQuery->bindValue(':category_name', $newCategory['name'], PDO::PARAM_STR);

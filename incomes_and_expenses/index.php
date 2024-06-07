@@ -1,28 +1,35 @@
 <?php
+session_start();
 require '../database/db.php';
 
+$user_id = $_SESSION['user_id'];
 //selecting expenses
-$selectExpensesQuery = $db->prepare('SELECT * FROM expenses');
+$selectExpensesQuery = $db->prepare('SELECT * FROM expenses WHERE user_id = :user_id');
+$selectExpensesQuery->bindValue(':user_id', $user_id);
 $selectExpensesQuery->execute();
 $expenses = $selectExpensesQuery->fetchAll();
 
 //select incomes
-$selectIncomesQuery = $db->prepare('SELECT * FROM incomes');
+$selectIncomesQuery = $db->prepare('SELECT * FROM incomes WHERE user_id = :user_id');
+$selectIncomesQuery->bindValue(':user_id', $user_id);
 $selectIncomesQuery->execute();
 $incomes = $selectIncomesQuery->fetchAll();
 
 //select categories
-$selectCategoriesQuery = $db->prepare('SELECT * FROM categories');
+$selectCategoriesQuery = $db->prepare('SELECT * FROM categories WHERE user_id = :user_id');
+$selectCategoriesQuery->bindValue(':user_id', $user_id);
 $selectCategoriesQuery->execute();
 $categories = $selectCategoriesQuery->fetchAll();
 
 //select income categories
-$selectIncomeCategoriesQuery = $db->prepare('SELECT * FROM income_categories');
+$selectIncomeCategoriesQuery = $db->prepare('SELECT * FROM income_categories WHERE user_id = :user_id');
+$selectIncomeCategoriesQuery->bindValue(':user_id', $user_id);
 $selectIncomeCategoriesQuery->execute();
 $incomeCategories = $selectIncomeCategoriesQuery->fetchAll();
 
 //select expense categories
-$selectExpenseCategoriesQuery = $db->prepare('SELECT * FROM expense_categories');
+$selectExpenseCategoriesQuery = $db->prepare('SELECT * FROM expense_categories WHERE user_id = :user_id');
+$selectExpenseCategoriesQuery->bindValue(':user_id', $user_id);
 $selectExpenseCategoriesQuery->execute();
 $expenseCategories = $selectExpenseCategoriesQuery->fetchAll();
 
@@ -48,7 +55,6 @@ $expenseCategories = $selectExpenseCategoriesQuery->fetchAll();
     </div>
     <div>
         <a class="btn btn-success me-2" id="saveButton">Save the list</a>
-        <!-- TODO: make functionality for creating new budget with selected items -->
         <a class="btn btn-primary me-2" id="constructBudgetButton">Add selected items to a new budget</a>
         <a class="btn btn-secondary" href="..">Back</a>
     </div>

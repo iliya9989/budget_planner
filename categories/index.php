@@ -1,7 +1,10 @@
 <?php
+session_start();
 require '../database/db.php';
 
-$selectCategoriesQuery = $db->prepare('SELECT * FROM categories');
+$user_id = $_SESSION['user_id'];
+$selectCategoriesQuery = $db->prepare('SELECT * FROM categories WHERE user_id = :user_id');
+$selectCategoriesQuery->bindParam(':user_id', $user_id);
 $selectCategoriesQuery->execute();
 $categories = $selectCategoriesQuery->fetchAll(PDO::FETCH_ASSOC);
 
