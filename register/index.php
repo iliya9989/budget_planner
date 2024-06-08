@@ -5,6 +5,10 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 if (!empty($_POST['email']) && !empty($_POST['password'])) {
+    if ($_POST['password'] !== $_POST['repeat-password']) {
+        echo "<script type='text/javascript'>alert('Passwords are not the same');</script>";
+        die();
+    }
     $email = trim($_POST['email']);
     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $checkEmailQuery = $db->prepare('SELECT email FROM users WHERE email = :email');
@@ -14,7 +18,7 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
             echo "User with this E-mail already exists";
             die();
         } else {
-            $username = htmlspecialchars($_POST['username']);
+            $username = $_POST['username'];
             $hashedPassword = password_hash($_POST['password'], PASSWORD_DEFAULT);
             $registerUserQuery = $db->prepare('INSERT INTO users (email, password, username) VALUES (:email, :password, :username)');
             $registerUserQuery->bindParam(':email', $email, PDO::PARAM_STR);
@@ -25,7 +29,7 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
             $getUserIdQuery = $db->prepare('SELECT user_id FROM users WHERE email = :email');
             $getUserIdQuery->bindParam(':email', $email, PDO::PARAM_STR);
             $getUserIdQuery->execute();
-            $_SESSION['user_id'] = htmlspecialchars($getUserIdQuery->fetch(PDO::FETCH_ASSOC)['user_id']);
+            $_SESSION['user_id'] = $getUserIdQuery->fetch(PDO::FETCH_ASSOC)['user_id'];
             setcookie('user_id', $_SESSION['user_id'], time() + 86000, '/');
             $_SESSION['username'] = $username;
             setcookie('username', $username, time() + 86000, '/');
@@ -69,6 +73,10 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
                 <div class="form-group">
                     <label for="password" class="text-light">Password</label>
                     <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <label for="repeat-password" class="text-light">Repeat the password</label>
+                    <input type="password" class="form-control" id="repeat-password" name="repeat-password" placeholder="Repeat the password" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
                 <a class="btn btn-secondary" href="..">Go back</a>

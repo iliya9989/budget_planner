@@ -19,13 +19,13 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
             $getUserIdQuery = $db->prepare('SELECT user_id FROM users WHERE email = :email');
             $getUserIdQuery->bindParam(':email', $email, PDO::PARAM_STR);
             $getUserIdQuery->execute();
-            $_SESSION['user_id'] = htmlspecialchars($getUserIdQuery->fetch(PDO::FETCH_ASSOC)['user_id']);
+            $_SESSION['user_id'] = $getUserIdQuery->fetch(PDO::FETCH_ASSOC)['user_id'];
             setcookie('user_id', $_SESSION['user_id'], time() + 86000, '/');
 
             $getUsername = $db->prepare('SELECT username FROM users WHERE email = :email');
             $getUsername->bindParam(':email', $email, PDO::PARAM_STR);
             $getUsername->execute();
-            $username = htmlspecialchars($getUsername->fetch(PDO::FETCH_ASSOC)['username']);
+            $username = $getUsername->fetch(PDO::FETCH_ASSOC)['username'];
             $_SESSION['username'] = $username;
             setcookie('username', $username, time() + 86000, '/');
 

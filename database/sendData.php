@@ -63,7 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Insert income items, link them to the budget and their categories
         foreach ($data['incomeItems'] as $name => $details) {
+
             $stmtIncome->execute([$user_id, $name, $details['value']]);
+            if ($details['value'] < 0) {
+                echo json_encode(['status' => 'error', 'message' => 'Negative number in incomes']);
+                exit;
+            }
             $income_id = $db->lastInsertId();
             $stmtBudgetIncome->execute([$user_id, $budget_id, $income_id]);
             if ($details['category']) {
@@ -73,6 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Insert expense items, link them to the budget and their categories
         foreach ($data['expensesItems'] as $name => $details) {
+            if ($details['value'] < 0) {
+                echo json_encode(['status' => 'error', 'message' => 'Negative number in expenses']);
+                exit;
+            }
             $stmtExpense->execute([$user_id, $name, $details['value']]);
             $expense_id = $db->lastInsertId();
             $stmtBudgetExpense->execute([$user_id, $budget_id, $expense_id]);

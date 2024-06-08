@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 07, 2024 at 02:58 AM
+-- Generation Time: Jun 07, 2024 at 05:35 AM
 -- Server version: 10.5.19-MariaDB-0+deb11u2
 -- PHP Version: 8.1.20
 
@@ -34,15 +34,6 @@ CREATE TABLE `budgets` (
                            `budget_balance` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `budgets`
---
-
-INSERT INTO `budgets` (`budget_id`, `user_id`, `budget_name`, `budget_balance`) VALUES
-                                                                                    (1, 1, 'TEST 1', 0),
-                                                                                    (2, 1, 'ыфвафыва', 0),
-                                                                                    (3, 1, 'фывафыва', 0);
-
 -- --------------------------------------------------------
 
 --
@@ -54,15 +45,6 @@ CREATE TABLE `budget_expenses` (
                                    `expense_id` int(11) NOT NULL,
                                    `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `budget_expenses`
---
-
-INSERT INTO `budget_expenses` (`budget_id`, `expense_id`, `user_id`) VALUES
-                                                                         (1, 1, NULL),
-                                                                         (2, 2, NULL),
-                                                                         (3, 3, NULL);
 
 -- --------------------------------------------------------
 
@@ -76,15 +58,6 @@ CREATE TABLE `budget_incomes` (
                                   `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `budget_incomes`
---
-
-INSERT INTO `budget_incomes` (`budget_id`, `income_id`, `user_id`) VALUES
-                                                                       (1, 1, NULL),
-                                                                       (2, 2, NULL),
-                                                                       (3, 3, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -96,14 +69,6 @@ CREATE TABLE `categories` (
                               `category_name` varchar(255) NOT NULL,
                               `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `categories`
---
-
-INSERT INTO `categories` (`category_id`, `category_name`, `user_id`) VALUES
-                                                                         (1, 'test', NULL),
-                                                                         (2, 'test 2', NULL);
 
 -- --------------------------------------------------------
 
@@ -118,15 +83,6 @@ CREATE TABLE `expenses` (
                             `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `expenses`
---
-
-INSERT INTO `expenses` (`expense_id`, `cost`, `expense_name`, `user_id`) VALUES
-                                                                             (1, 1, 'test expense', NULL),
-                                                                             (2, 1, 'фыва', NULL),
-                                                                             (3, 1, 'фывафыва', NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -138,13 +94,6 @@ CREATE TABLE `expense_categories` (
                                       `category_id` int(11) NOT NULL,
                                       `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `expense_categories`
---
-
-INSERT INTO `expense_categories` (`expense_id`, `category_id`, `user_id`) VALUES
-    (2, 2, NULL);
 
 -- --------------------------------------------------------
 
@@ -159,15 +108,6 @@ CREATE TABLE `incomes` (
                            `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `incomes`
---
-
-INSERT INTO `incomes` (`income_id`, `amount`, `income_name`, `user_id`) VALUES
-                                                                            (1, 1, 'test income', NULL),
-                                                                            (2, 1, 'фывафыва', NULL),
-                                                                            (3, 1, 'фыва', NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -180,13 +120,6 @@ CREATE TABLE `income_categories` (
                                      `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `income_categories`
---
-
-INSERT INTO `income_categories` (`income_id`, `category_id`, `user_id`) VALUES
-    (2, 2, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -197,18 +130,8 @@ CREATE TABLE `users` (
                          `user_id` int(11) NOT NULL,
                          `username` varchar(255) NOT NULL,
                          `email` varchar(255) NOT NULL,
-                         `password` varchar(255) NOT NULL,
-                         `facebook_id` varchar(255) DEFAULT NULL,
-                         `google_id` varchar(255) DEFAULT NULL,
-                         `vk_id` varchar(255) DEFAULT NULL
+                         `password` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `facebook_id`, `google_id`, `vk_id`) VALUES
-    (1, 'Pushok', 'iliya9989@gmail.com', '$2y$10$/Do7RYE4vUpLIpWzo70E5.zWb7a5ueFeCk7vs/izCWtYs.3KUZAcO', NULL, NULL, NULL);
 
 --
 -- Indexes for dumped tables
@@ -280,10 +203,7 @@ ALTER TABLE `income_categories`
 ALTER TABLE `users`
     ADD PRIMARY KEY (`user_id`),
     ADD UNIQUE KEY `username` (`username`),
-    ADD UNIQUE KEY `email` (`email`),
-    ADD UNIQUE KEY `facebook_id` (`facebook_id`),
-    ADD UNIQUE KEY `google_id` (`google_id`),
-    ADD UNIQUE KEY `vk_id` (`vk_id`);
+    ADD UNIQUE KEY `email` (`email`);
 
 --
 -- AUTO_INCREMENT for dumped tables

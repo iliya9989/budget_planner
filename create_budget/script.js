@@ -42,7 +42,8 @@ incomeSubmitButton.addEventListener("click", (event) => {
 
   // Check if the values are valid
   if (!incomeItemName.value || !parseInt(incomeItemValue.value) || parseInt(incomeItemValue.value) <= 0) {
-    incomeItemName.placeholder = "Please, enter valid values";
+    // incomeItemName.placeholder = "Please, enter valid values";
+    alert("Please, enter valid values");
     throw new Error("Values are not valid");
   }
 
@@ -111,7 +112,8 @@ expensesSubmitButton.addEventListener("click", (event) => {
 
   // Check if the values are valid
   if (!expensesItemName.value || !parseInt(expensesItemValue.value) || parseInt(expensesItemValue.value) <= 0) {
-    expensesItemName.placeholder = "Please, enter valid values";
+    // expensesItemName.placeholder = "Please, enter valid values";
+    alert("Please, enter valid values");
     throw new Error("Values are not valid");
   }
 
@@ -233,11 +235,16 @@ function submitForms() {
   })
       .then((response) => response.json())
       .then((responseData) => {
+        if (responseData.status === "error") {
+          console.error("Error:");
+          alert("Invalid number in input");
+        }
         console.log("Success:", responseData);
         window.location.href = "../index.php";
       })
       .catch((error) => {
         console.error("Error:", error);
+        alert(error);
       });
 }
 

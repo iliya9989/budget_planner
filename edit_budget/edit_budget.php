@@ -69,7 +69,7 @@ if (isset($_GET['budget_id']) && is_numeric($_GET['budget_id'])) {
         $categories = $selectCategoriesQuery->fetchAll(PDO::FETCH_ASSOC);
 
     } catch (PDOException $e) {
-        echo "Error: " . htmlspecialchars($e->getMessage());
+        echo "Error: " . $e->getMessage();
     }
 } else {
     echo "Invalid or missing budget ID.";
