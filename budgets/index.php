@@ -138,7 +138,7 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
                         $budget_id = htmlspecialchars($budget['budget_id']);
                         if ($budget['budget_balance'] > 0) {
                             ?>
-                            <div class="row m-2 border border-5 border-success rounded-3 p-3 my-3 shadow text-light">
+                            <div class="row m-2 bg-success bg-opacity-25 border border-5 border-success rounded-3 p-3 my-3 shadow text-light">
                                 <h4 class="text-black text-center"><?= $budget_name ?></h4>
                                 <div class="col-3">
                                     <div class="row">
@@ -174,7 +174,7 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
                             <?php
                         } elseif ($budget['budget_balance'] < 0) {
                             ?>
-                            <div class="row m-2 border border-5 border-danger rounded-3 p-3 my-3 shadow text-light">
+                            <div class="row m-2 bg-danger bg-opacity-25 border border-5 border-danger rounded-3 p-3 my-3 shadow text-light">
                                 <h4 class="text-black text-center"><?= $budget_name ?></h4>
                                 <div class="col-3">
                                     <div class="row">
@@ -210,7 +210,7 @@ if (!empty($_SESSION['username']) && !empty($_SESSION['user_id'])) {
                             <?php
                         } else {
                             ?>
-                            <div class="row m-2 border border-5 border-warning rounded-3 p-3 my-3 shadow text-light">
+                            <div class="row bg-warning bg-opacity-25 m-2 border border-5 border-warning rounded-3 p-3 my-3 shadow text-light">
                                 <h4 class="text-black text-center"><?= $budget_name ?></h4>
                                 <div class="col-3">
                                     <div class="row">
