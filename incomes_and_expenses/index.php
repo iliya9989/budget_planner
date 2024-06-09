@@ -33,6 +33,22 @@ $selectExpenseCategoriesQuery = $db->prepare('SELECT * FROM expense_categories W
 $selectExpenseCategoriesQuery->bindValue(':user_id', $user_id, PDO::PARAM_INT);
 $selectExpenseCategoriesQuery->execute();
 $expenseCategories = $selectExpenseCategoriesQuery->fetchAll(PDO::FETCH_ASSOC);
+
+// Create a mapping of categories for easy access
+$categoryMap = [];
+foreach ($categories as $category) {
+    $categoryMap[$category['category_id']] = $category['category_name'];
+}
+
+function getCategoryOptions($categoryMap, $selectedCategoryId)
+{
+    $options = '';
+    foreach ($categoryMap as $categoryId => $categoryName) {
+        $selected = $categoryId == $selectedCategoryId ? 'selected' : '';
+        $options .= "<option value=\"" . htmlspecialchars($categoryId) . "\" $selected>" . htmlspecialchars($categoryName) . "</option>";
+    }
+    return $options;
+}
 ?>
 
 <!DOCTYPE html>
@@ -67,26 +83,20 @@ $expenseCategories = $selectExpenseCategoriesQuery->fetchAll(PDO::FETCH_ASSOC);
                 <!-- Incomes -->
                 <div id="incomeItemsContainer" class="col-4 mx-auto my-3 p-2">
                     <h3 class="text-center">Incomes</h3>
-                    <?php foreach ($incomes as $income) { ?>
+                    <?php foreach ($incomes as $income) {
+                        $selectedCategoryId = null;
+                        foreach ($incomeCategories as $incomeCategory) {
+                            if ($income['income_id'] === $incomeCategory['income_id']) {
+                                $selectedCategoryId = $incomeCategory['category_id'];
+                                break;
+                            }
+                        }
+                        ?>
                         <div class="income-item row bg-success border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= htmlspecialchars($income['income_id']) ?>">
                             <input value="<?= htmlspecialchars($income['income_name']) ?>" type="text" class="incomeName w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break">
                             <input value="<?= htmlspecialchars($income['amount']) ?>" id='itemValue' class="w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1">
                             <select class="form-select w-25">
-                                <?php
-                                foreach ($categories as $category) {
-                                    foreach ($incomeCategories as $incomeCategory) {
-                                        if($income['income_id'] === $incomeCategory['income_id'] && $incomeCategory['category_id'] === $category['category_id']){
-                                            ?>
-                                            <option selected value="<?= htmlspecialchars($category['category_id']) ?>" data-category-id="<?= htmlspecialchars($category['category_id']) ?>"><?= htmlspecialchars($category['category_name']) ?></option>
-                                            <?php
-                                        } else {
-                                            ?>
-                                            <option value="<?= htmlspecialchars($category['category_id']) ?>" data-category-id="<?= htmlspecialchars($category['category_id']) ?>"><?= htmlspecialchars($category['category_name']) ?></option>
-                                            <?php
-                                        }
-                                    }
-                                }
-                                ?>
+                                <?= getCategoryOptions($categoryMap, $selectedCategoryId) ?>
                             </select>
                             <input class="align-self-center form-check-input" type="checkbox" value="" id="defaultCheck1">
                             <button class="deleteButtonIncome btn col-1" style="justify-self: end; font-weight: bold;">X</button>
@@ -96,26 +106,20 @@ $expenseCategories = $selectExpenseCategoriesQuery->fetchAll(PDO::FETCH_ASSOC);
                 <!-- Expenses -->
                 <div id="expenseItemsContainer" class="col-4 mx-auto my-3 p-2">
                     <h3 class="text-center">Expenses</h3>
-                    <?php foreach ($expenses as $expense) { ?>
+                    <?php foreach ($expenses as $expense) {
+                        $selectedCategoryId = null;
+                        foreach ($expenseCategories as $expenseCategory) {
+                            if ($expense['expense_id'] === $expenseCategory['expense_id']) {
+                                $selectedCategoryId = $expenseCategory['category_id'];
+                                break;
+                            }
+                        }
+                        ?>
                         <div class="expense-item row bg-danger border rounded-3 p-3 my-1 shadow text-light justify-content-around" data-id="<?= htmlspecialchars($expense['expense_id']) ?>">
                             <input value="<?= htmlspecialchars($expense['expense_name']) ?>" type="text" class="expenseName w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break">
                             <input value="<?= htmlspecialchars($expense['cost']) ?>" id='itemValue' class="w-25 col-auto my-auto bg-light border rounded-5 text-success-emphasis text-center text-break ms-1">
                             <select class="form-select w-25">
-                                <?php
-                                foreach ($categories as $category) {
-                                    foreach ($expenseCategories as $expenseCategory) {
-                                        if($expense['expense_id'] === $expenseCategory['expense_id'] && $expenseCategory['category_id'] === $category['category_id']){
-                                            ?>
-                                            <option selected value="<?= htmlspecialchars($category['category_id']) ?>" data-category-id="<?= htmlspecialchars($category['category_id']) ?>"><?= htmlspecialchars($category['category_name']) ?></option>
-                                            <?php
-                                        } else {
-                                            ?>
-                                            <option value="<?= htmlspecialchars($category['category_id']) ?>" data-category-id="<?= htmlspecialchars($category['category_id']) ?>"><?= htmlspecialchars($category['category_name']) ?></option>
-                                            <?php
-                                        }
-                                    }
-                                }
-                                ?>
+                                <?= getCategoryOptions($categoryMap, $selectedCategoryId) ?>
                             </select>
                             <input class="align-self-center form-check-input" type="checkbox" value="" id="defaultCheck1">
                             <button class="deleteButtonExpense btn col-1" style="justify-self: end; font-weight: bold;">X</button>
